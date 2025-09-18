@@ -26,10 +26,10 @@ public class ExercisesController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateExercise([FromBody] ExerciseCreationDto exerciseForCreationDto)
+    public async Task<IActionResult> CreateExercise([FromRoute] int classroomId, [FromBody] ExerciseCreationDto exerciseForCreationDto)
     {
-        var createdExercise = await _serviceManager.ExerciseService.CreateAsync(exerciseForCreationDto);
-        return CreatedAtAction(nameof(GetExerciseById), new { exerciseId = createdExercise.Id }, createdExercise);
+        var createdExercise = await _serviceManager.ExerciseService.CreateAsync(classroomId, exerciseForCreationDto);
+        return CreatedAtAction(nameof(GetExerciseById), new { exerciseId = createdExercise.Id, classroomId = createdExercise.ClassroomId }, createdExercise);
     }
 
     [HttpPut("{exerciseId:int}")]
