@@ -3,7 +3,7 @@ using Service.Abstractions;
 using Shared.DTOs.Exercise;
 
 [ApiController]
-[Route("api/exercises")]
+[Route("api/classroom/{classroomId:int}/exercise")]
 public class ExercisesController : ControllerBase
 {
     private readonly IServiceManager _serviceManager;
