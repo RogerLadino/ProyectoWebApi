@@ -5,6 +5,12 @@ using Persistence;
 using Persistence.Repositories;
 using Serilog;
 using Service.Abstractions;
+using Core.Services;
+using Core.Services.Abstractions;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
