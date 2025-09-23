@@ -16,6 +16,9 @@ namespace Persistence.Repositories
         }
 
         public IExerciseRepository ExerciseRepository =>  _lazyExerciseRepository.Value;
+
+        public IUsuarioRepository UsuarioRepository => throw new NotImplementedException();
+
         public async Task SaveChangesAsync()
         {
             await _dbContext.SaveChangesAsync();
