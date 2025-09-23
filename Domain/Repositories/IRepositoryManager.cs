@@ -6,4 +6,6 @@ public interface IRepositoryManager
 {
     IExerciseRepository ExerciseRepository { get; }
     Task SaveChangesAsync();
+    IClassroomRepository ClassroomRepository { get; }
+
 }
