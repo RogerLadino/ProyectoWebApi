@@ -5,6 +5,7 @@ using Persistence;
 using Persistence.Repositories;
 using Serilog;
 using Service.Abstractions;
+using Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,6 +31,8 @@ builder.Services.AddDbContext<RepositoryDbContext>(options =>
 
 builder.Services.AddScoped<IServiceManager, ServiceManager>();
 builder.Services.AddScoped<IRepositoryManager, RepositoryManager>();
+builder.Services.AddScoped<IClassroomService, ClassroomService>();
+builder.Services.AddScoped<IClassroomRepository, ClassroomRepository>();
 
 // Middlewares
 
