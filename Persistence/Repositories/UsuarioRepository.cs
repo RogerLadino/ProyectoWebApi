@@ -6,17 +6,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Threading.Tasks;
 
 namespace Persistence.Repositories
 {
-    public class UsuarioRepository : IUsuarioRepository
+    public class UsuarioRepository : RepositoryBase<AppUser>, IUsuarioRepository
     {
         private readonly RepositoryDbContext _context;
 
-        public UsuarioRepository(RepositoryDbContext context)
+        public UsuarioRepository(RepositoryDbContext repositoryContext) : base(repositoryContext)
         {
-            _context = context;
+            _context = repositoryContext;
         }
 
         public async Task<AppUser?> GetByEmailAsync(string email)
