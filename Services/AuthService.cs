@@ -1,36 +1,37 @@
-﻿using Service.Abstractions;
-using Core.Services.Abstractions;
+﻿using Core.Services.Abstractions;
 using Domain.Entities;
+using Domain.Repositories;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using Service.Abstractions;
 using Shared.DTOs.Users;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using Core.Exceptions;
 using System.Text;
-using Persistence.Repositories;
 
 
 namespace Core.Services
 {
     public class AuthService : IAuthService
     {
-        private readonly IUsuarioRepository _usuarioRepository;
+        private readonly IRepositoryManager _repositoryManager;
         private readonly IEmailService _emailService;
         private readonly IConfiguration _configuration;
 
-        public AuthService(IUsuarioRepository usuarioRepository, IEmailService emailService, IConfiguration configuration)
+        public AuthService(IRepositoryManager repositoryManager, IEmailService emailService, IConfiguration configuration)
         {
-            _usuarioRepository = usuarioRepository;
+            _repositoryManager = repositoryManager;
             _emailService = emailService;
             _configuration = configuration;
         }
 
         public async Task<string?> LoginAsync(LoginDTO loginDto)
         {
-            var usuario = await _usuarioRepository.GetByEmailAsync(loginDto.CorreoElectronico);
-            if (usuario == null || !BCrypt.Net.BCrypt.Verify(loginDto.Clave, usuario.ClaveHash))
+            var usuario = await _repositoryManager.UsuarioRepository.GetByEmailAsync(loginDto.CorreoElectronico);
+            if (usuario == null || !BCrypt.Net.BCrypt.Verify(loginDto.Clave, usuario.Password))
             {
-                return null;
+                throw new InvalidCredentialsException("Correo o clave incorrectos.");
             }
 
             return GenerateJwtToken(usuario);
@@ -38,10 +39,10 @@ namespace Core.Services
 
         public async Task<bool> RegistroAsync(RegistroDTO registroDto)
         {
-            var usuarioExistente = await _usuarioRepository.GetByEmailAsync(registroDto.CorreoElectronico);
+            var usuarioExistente = await _repositoryManager.UsuarioRepository.GetByEmailAsync(registroDto.CorreoElectronico);
             if (usuarioExistente != null)
             {
-                return false;
+                throw new UserAlreadyExistsException("El correo electrónico ya está en uso.");
             }
 
             var claveHash = BCrypt.Net.BCrypt.HashPassword(registroDto.Clave);
@@ -53,42 +54,42 @@ namespace Core.Services
                 AppRoleId = registroDto.RolId
             };
 
-            await _usuarioRepository.AddAsync(nuevoUsuario);
+            await _repositoryManager.UsuarioRepository.AddAsync(nuevoUsuario);
             return true;
         }
 
         public async Task<bool> ForgotPasswordAsync(ForgotPasswordDTO forgotPasswordDto)
         {
-            var usuario = await _usuarioRepository.GetByEmailAsync(forgotPasswordDto.CorreoElectronico);
+            var usuario = await _repositoryManager.UsuarioRepository.GetByEmailAsync(forgotPasswordDto.CorreoElectronico);
             if (usuario == null)
             {
-                return true;
+                throw new InvalidTokenException("El token de recuperación es inválido o ha expirado.");
             }
 
             var token = Guid.NewGuid().ToString();
             usuario.TokenResetPassword = token;
             usuario.FechaExpiracionToken = DateTime.UtcNow.AddMinutes(double.Parse(_configuration["PasswordRecoverySettings:TokenExpirationInMinutes"]!));
-            await _usuarioRepository.UpdateAsync(usuario);
+            await _repositoryManager.UsuarioRepository.UpdateAsync(usuario);
 
             var resetLink = $"https://tu-dominio-frontend.com/reset-password?token={token}";
             var emailBody = $"Para restablecer tu contraseña, haz clic en el siguiente enlace: <a href=\"{resetLink}\">Restablecer contraseña</a>";
-            await _emailService.SendEmailAsync(usuario.CorreoElectronico, "Restablecer tu contraseña", emailBody);
+            await _emailService.SendEmailAsync(usuario.Email, "Restablecer tu contraseña", emailBody);
 
             return true;
         }
 
         public async Task<bool> ResetPasswordAsync(ResetPasswordDTO resetPasswordDto)
         {
-            var usuario = await _usuarioRepository.GetByResetTokenAsync(resetPasswordDto.Token);
+            var usuario = await _repositoryManager.UsuarioRepository.GetByResetTokenAsync(resetPasswordDto.Token);
             if (usuario == null || usuario.FechaExpiracionToken < DateTime.UtcNow)
             {
                 return false;
             }
 
-            usuario.ClaveHash = BCrypt.Net.BCrypt.HashPassword(resetPasswordDto.NuevaClave);
+            usuario.Password = BCrypt.Net.BCrypt.HashPassword(resetPasswordDto.NuevaClave);
             usuario.TokenResetPassword = null;
             usuario.FechaExpiracionToken = null;
-            await _usuarioRepository.UpdateAsync(usuario);
+            await _repositoryManager.UsuarioRepository.UpdateAsync(usuario);
 
             return true;
         }
