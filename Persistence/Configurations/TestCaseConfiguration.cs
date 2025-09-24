@@ -17,7 +17,7 @@ public class TestCaseConfiguration : IEntityTypeConfiguration<TestCase>
         builder.HasOne(d => d.Exercise)
             .WithMany(p => p.TestCases)
             .HasForeignKey(d => d.ExerciseId)
-            .OnDelete(DeleteBehavior.ClientSetNull)
+            .OnDelete(DeleteBehavior.Cascade)
             .HasConstraintName("FK__TestCase__Exercise");
     }
 }
