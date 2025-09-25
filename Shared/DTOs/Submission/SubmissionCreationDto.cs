@@ -1,5 +1,4 @@
-﻿
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Shared.DTOs.Submission;
@@ -19,4 +18,3 @@ public partial class SubmissionCreationDto
     [Column(TypeName = "datetime")]
     public DateTime? SubmittedAt { get; set; } = null;
 }
-

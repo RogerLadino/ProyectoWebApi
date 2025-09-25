@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Shared.DTOs.Users;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Shared.DTOs.Submission;
@@ -17,4 +18,8 @@ public partial class SubmissionDto
 
     [Column(TypeName = "datetime")]
     public DateTime? SubmittedAt { get; set; }
+
+    [ForeignKey("AppUserId")]
+    [InverseProperty("Submissions")]
+    public virtual AppUserDto AppUser { get; set; } = null!;
 }
