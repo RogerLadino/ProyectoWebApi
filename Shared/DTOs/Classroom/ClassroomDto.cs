@@ -7,4 +7,6 @@ public partial class ClassroomDto
     public int Id { get; set; }
     public string Name { get; set; } = string.Empty;
 
+    [Column(TypeName = "text")]
+    public string Code { get; set; } = null!;
 }

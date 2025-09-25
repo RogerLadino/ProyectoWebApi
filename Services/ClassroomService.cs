@@ -26,6 +26,7 @@ public class ClassroomService : IClassroomService
     {
         var classroom = await _repositoryManager.ClassroomRepository.GetByIdAsync(classroomId);
 
+
         if (classroom is null)
             throw new ClassroomNotFoundException("No classroom exists with the given ID");
 
@@ -51,7 +52,7 @@ public class ClassroomService : IClassroomService
         return classroom.Adapt<ClassroomDto>();
     }
 
-    public async Task UpdateAsync(int classroomId, ClassroomDto classroomForUpdateDto)
+    public async Task UpdateAsync(int classroomId, ClassroomUpdateDto classroomForUpdateDto)
     {
 
         var classroom = await _repositoryManager.ClassroomRepository.GetByIdAsync(classroomId);

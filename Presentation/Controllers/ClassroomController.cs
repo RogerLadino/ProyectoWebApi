@@ -49,7 +49,7 @@ public class ClassroomController : ControllerBase
 
     // PUT: api/classrooms/5
     [HttpPut("{id}")]
-    public async Task<ActionResult> Update(int id, [FromBody] ClassroomDto updateDto)
+    public async Task<ActionResult> Update(int id, [FromBody] ClassroomUpdateDto updateDto)
     {
         await _classroomService.UpdateAsync(id, updateDto);
         return NoContent(); // 204 No Content
