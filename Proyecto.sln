@@ -23,6 +23,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LoggingService", "LoggingSe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared", "Shared\Shared.csproj", "{EA54A283-5CBC-44CA-A2C5-23076F797947}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Realtime", "Realtime\Realtime.csproj", "{4B2ECDBC-EA5A-4AAB-BA6F-778CAF9DC364}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -61,6 +63,10 @@ Global
 		{EA54A283-5CBC-44CA-A2C5-23076F797947}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EA54A283-5CBC-44CA-A2C5-23076F797947}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EA54A283-5CBC-44CA-A2C5-23076F797947}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4B2ECDBC-EA5A-4AAB-BA6F-778CAF9DC364}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4B2ECDBC-EA5A-4AAB-BA6F-778CAF9DC364}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4B2ECDBC-EA5A-4AAB-BA6F-778CAF9DC364}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4B2ECDBC-EA5A-4AAB-BA6F-778CAF9DC364}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -71,6 +77,7 @@ Global
 		{DD99E4F0-5E7E-40C8-9D86-7E66778A84CD} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{A8393816-FD72-45F2-AD64-FEB121A71434} = {B1BBAC3A-A2F3-42B9-A800-65799D4C09F0}
 		{185D31A7-408C-4AFA-ADAA-A36461885295} = {B1BBAC3A-A2F3-42B9-A800-65799D4C09F0}
+		{4B2ECDBC-EA5A-4AAB-BA6F-778CAF9DC364} = {B1BBAC3A-A2F3-42B9-A800-65799D4C09F0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {30A0EC92-1B29-4722-8BCE-5BD4605237B1}

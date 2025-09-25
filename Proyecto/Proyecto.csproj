@@ -21,6 +21,7 @@
     <ProjectReference Include="..\LoggingService\LoggingService.csproj" />
     <ProjectReference Include="..\Persistence\Persistence.csproj" />
     <ProjectReference Include="..\Presentation\Presentation.csproj" />
+    <ProjectReference Include="..\Realtime\Realtime.csproj" />
     <ProjectReference Include="..\Service.Abstractions\Service.Abstractions.csproj" />
     <ProjectReference Include="..\Services\Services.csproj" />
   </ItemGroup>
