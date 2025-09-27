@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Threading.Tasks;
 
-namespace ClassroomApi.Core.Services
+namespace Services
 {
     public class EmailService : IEmailService
     {

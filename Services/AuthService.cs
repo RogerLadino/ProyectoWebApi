@@ -49,7 +49,10 @@ namespace Core.Services
             var nuevoUsuario = new AppUser
             {
                 Email = registroDto.CorreoElectronico,
-                FirstName = registroDto.NombreUsuario,
+                FirstName = registroDto.PrimerNombre,
+                MiddleName = registroDto.SegundoNombre,
+                LastName = registroDto.PrimerApellido,
+                SecondLastName = registroDto.SegundoApellido, 
                 Password = claveHash,
                 AppRoleId = registroDto.RolId
             };

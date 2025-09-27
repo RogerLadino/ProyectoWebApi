@@ -1,6 +1,7 @@
 ﻿using Core.Services.Abstractions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Service.Abstractions;
 using Shared.DTOs.Users;
 using System;
 using System.Collections.Generic;
@@ -15,11 +16,11 @@ namespace ClassroomApi.Infrastructure.Presentation.Controllers
     [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {
-        private readonly IAuthService _authService;
+        private readonly IServiceManager _serviceManager;
 
-        public AuthController(IAuthService authService)
+        public AuthController(IServiceManager serviceManager)
         {
-            _authService = authService;
+            _serviceManager = serviceManager;
         }
 
         [HttpPost("registro")]
@@ -31,7 +32,7 @@ namespace ClassroomApi.Infrastructure.Presentation.Controllers
                 return BadRequest(ModelState);
             }
 
-            var success = await _authService.RegistroAsync(registroDto);
+            var success = await _serviceManager.AuthService.RegistroAsync(registroDto);
             if (!success)
             {
                 return Conflict(new { message = "El usuario ya existe." });
@@ -44,7 +45,7 @@ namespace ClassroomApi.Infrastructure.Presentation.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Login([FromBody] LoginDTO loginDto)
         {
-            var token = await _authService.LoginAsync(loginDto);
+            var token = await _serviceManager.AuthService.LoginAsync(loginDto);
             if (token == null)
             {
                 return Unauthorized(new { message = "Credenciales incorrectas." });
@@ -57,7 +58,7 @@ namespace ClassroomApi.Infrastructure.Presentation.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDTO forgotPasswordDto)
         {
-            await _authService.ForgotPasswordAsync(forgotPasswordDto);
+            await _serviceManager.AuthService.ForgotPasswordAsync(forgotPasswordDto);
             return Ok(new { message = "Si existe una cuenta con ese correo, un enlace de recuperación ha sido enviado." });
         }
 
@@ -70,7 +71,7 @@ namespace ClassroomApi.Infrastructure.Presentation.Controllers
                 return BadRequest(ModelState);
             }
 
-            var success = await _authService.ResetPasswordAsync(resetPasswordDto);
+            var success = await _serviceManager.AuthService.ResetPasswordAsync(resetPasswordDto);
             if (!success)
             {
                 return BadRequest(new { message = "El token es inválido o ha expirado." });
