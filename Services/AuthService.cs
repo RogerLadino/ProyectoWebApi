@@ -100,7 +100,7 @@ namespace Core.Services
         private string GenerateJwtToken(AppUser usuario)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_configuration["JwtSettings:Secret"]!);
+            var key = Encoding.UTF8.GetBytes(_configuration["JwtSettings:Secret"]!);
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(new[]
