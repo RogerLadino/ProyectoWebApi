@@ -100,6 +100,8 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
