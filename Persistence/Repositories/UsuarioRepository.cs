@@ -42,5 +42,27 @@ namespace Persistence.Repositories
             _context.AppUsers.Update(usuario);
             await _context.SaveChangesAsync();
         }
+        // NUEVO MÉTODO PARA TRAER USUARIO + AULAS
+        public async Task<AppUser?> GetByIdWithClassroomsAsync(string userId)
+        {
+            // Convertir el userId (string) a int para comparar con AppUser.Id (int)
+            if (!int.TryParse(userId, out int id))
+                return null;
+
+            return await _context.AppUsers
+                .Include(u => u.Classrooms)
+                .FirstOrDefaultAsync(u => u.Id == id);
+        }
+        public async Task<AppUser> GetByIdAsync(string userId)
+        {
+            if (!int.TryParse(userId, out int id))
+                throw new ArgumentException("El userId debe ser un número entero válido.", nameof(userId));
+
+            var user = await _context.AppUsers.FindAsync(id);
+            if (user == null)
+                throw new InvalidOperationException($"No se encontró el usuario con Id {userId}.");
+
+            return user;
+        }
     }
-}
+}   

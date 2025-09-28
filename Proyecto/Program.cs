@@ -5,13 +5,13 @@ using Persistence;
 using Persistence.Repositories;
 using Serilog;
 using Service.Abstractions;
+using Services;
 using Core.Services;
 using Core.Services.Abstractions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Service extensions
@@ -36,6 +36,8 @@ builder.Services.AddDbContext<RepositoryDbContext>(options =>
 
 builder.Services.AddScoped<IServiceManager, ServiceManager>();
 builder.Services.AddScoped<IRepositoryManager, RepositoryManager>();
+builder.Services.AddScoped<IClassroomService, ClassroomService>();
+builder.Services.AddScoped<IClassroomRepository, ClassroomRepository>();
 
 // Middlewares
 

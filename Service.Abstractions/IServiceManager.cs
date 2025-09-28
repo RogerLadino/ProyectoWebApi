@@ -5,6 +5,8 @@ namespace Service.Abstractions;
 public interface IServiceManager
 {
     IExerciseService ExerciseService { get; }
+
+    IClassroomService ClassroomService { get; }
     IAuthService AuthService { get; }
     IEmailService EmailService { get; }
 }

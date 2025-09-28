@@ -15,5 +15,7 @@ namespace Persistence.Repositories
         Task<AppUser?> GetByEmailAsync(string email);
         Task<AppUser?> GetByResetTokenAsync(string token);
         Task UpdateAsync(AppUser usuario);
+        Task<AppUser?> GetByIdWithClassroomsAsync(string userId);
+        Task<AppUser> GetByIdAsync(string userId);
     }
 }
