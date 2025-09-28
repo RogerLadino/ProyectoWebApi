@@ -10,6 +10,6 @@ public interface IRepositoryManager
     IUsuarioRepository UsuarioRepository { get; }
 
     IClassroomRepository ClassroomRepository { get; }
-
-
+    IUserClassroomRepository UserClassroomRepository { get; }
+    object UserRepository { get; set; }
 }

@@ -13,6 +13,7 @@ public sealed class ServiceManager : IServiceManager
     {
         _lazyExerciseService = new Lazy<IExerciseService>(() => new ExerciseService(repositoryManager));
         _lazyClassroomService = new Lazy<IClassroomService>(() => new ClassroomService(repositoryManager));
+    }
     private readonly Lazy<IEmailService> _lazyEmailService;
     private readonly Lazy<IAuthService> _lazyAuthService;
 
