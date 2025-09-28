@@ -37,6 +37,15 @@ public partial class RepositoryDbContext : DbContext
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(RepositoryDbContext).Assembly);
         OnModelCreatingPartial(modelBuilder);
+
+        modelBuilder.Entity<AppRole>().HasData(
+                new AppRole { Id = 1, Description = "profesor" },
+                new AppRole { Id = 2, Description = "alumno" }
+            );
+
+        modelBuilder.Entity<AppUser>()
+            .HasIndex(u => u.Email)
+            .IsUnique();
     }
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);

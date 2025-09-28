@@ -9,6 +9,8 @@ namespace Persistence.Repositories
         private readonly Lazy<IExerciseRepository> _lazyExerciseRepository;
         private readonly Lazy<IClassroomRepository> _lazyClassroomRepository;
 
+        private readonly Lazy<IUsuarioRepository> _lazyUsuarioRepository;
+
         public RepositoryManager(RepositoryDbContext dbContext)
         {
             _dbContext = dbContext;
@@ -16,10 +18,14 @@ namespace Persistence.Repositories
             _lazyExerciseRepository = new Lazy<IExerciseRepository>(() => new ExerciseRepository(_dbContext));
             
             _lazyClassroomRepository = new Lazy<IClassroomRepository>(() => new ClassroomRepository(_dbContext));
+            _lazyUsuarioRepository = new Lazy<IUsuarioRepository>(() => new UsuarioRepository(_dbContext));
         }
         public IClassroomRepository ClassroomRepository => _lazyClassroomRepository.Value;   
 
         public IExerciseRepository ExerciseRepository =>  _lazyExerciseRepository.Value;
+
+        public IUsuarioRepository UsuarioRepository => _lazyUsuarioRepository.Value;
+
         public async Task SaveChangesAsync()
         {
             await _dbContext.SaveChangesAsync();

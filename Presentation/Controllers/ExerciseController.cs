@@ -1,7 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Service.Abstractions;
 using Shared.DTOs.Exercise;
+using System.Security.Claims;
 
+[Authorize]
 [ApiController]
 [Route("api/exercises")]
 public class ExercisesController : ControllerBase
@@ -10,6 +13,13 @@ public class ExercisesController : ControllerBase
 
     public ExercisesController(IServiceManager serviceManager)
         => _serviceManager = serviceManager;
+
+    [HttpGet("Profile")]
+    public async Task<IActionResult> Profile()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.Role);
+        return Ok(userId);
+    }
 
     [HttpGet]
     public async Task<IActionResult> GetAllExercises()
