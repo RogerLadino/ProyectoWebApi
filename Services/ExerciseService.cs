@@ -32,12 +32,13 @@ public class ExerciseService : IExerciseService
         return exercise.Adapt<ExerciseDto>();
     }
 
-    public async Task<ExerciseDto> CreateAsync(ExerciseCreationDto exerciseForCreationDto)
+    public async Task<ExerciseDto> CreateAsync(int classroomId, ExerciseCreationDto exerciseForCreationDto)
     {
+        exerciseForCreationDto.ClassroomId = classroomId;
         var exercise = exerciseForCreationDto.Adapt<Exercise>();
 
         var exerciseExists = await _repositoryManager.ExerciseRepository
-            .AnyAsync(e => e.Name.Equals(exercise.Name) && e.Id != exercise.Id);
+            .AnyAsync(e => e.Name.Equals(exercise.Name) && e.ClassroomId.Equals(exercise.ClassroomId));
 
         if (exerciseExists)
             throw new ExerciseAlreadyExistsException("An exercise with the same name already exists");

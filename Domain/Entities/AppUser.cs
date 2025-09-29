@@ -33,6 +33,8 @@ public partial class AppUser
     [ForeignKey("AppRoleId")]
     [InverseProperty("AppUsers")]
     public virtual AppRole AppRole { get; set; } = null!;
+    public string? TokenResetPassword { get; set; }
+    public DateTime? FechaExpiracionToken { get; set; }
 
     [InverseProperty("AppUser")]
     public virtual ICollection<Submission> Submissions { get; set; } = new List<Submission>();
