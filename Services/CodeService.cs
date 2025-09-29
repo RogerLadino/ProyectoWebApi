@@ -1,5 +1,6 @@
 ﻿using Domain.Entities;
 using Domain.Exceptions;
+using Domain.Exceptions.Exceptions;
 using Domain.Realtime;
 using Domain.Repositories;
 using Mapster;
@@ -33,15 +34,38 @@ public class CodeService : ICodeService
             return code.Adapt<CodeUpdateDto>();
         }
 
-
-        await _submissionService.CreateAsync(new SubmissionCreationDto
+        var submissionForCreationDto = new SubmissionCreationDto
         {
             AppUserId = userId,
             ExerciseId = exerciseId,
             Grade = 0,
             Status = 0,
             SubmittedAt = null
-        });
+        };
+
+        var submission = submissionForCreationDto.Adapt<Submission>();
+
+        var submissionExists = await _repositoryManager.SubmissionRepository
+            .AnyAsync(s => s.ExerciseId == submission.ExerciseId
+                        && s.AppUserId == submission.AppUserId);
+
+        if (submissionExists)
+            throw new SubmissionAlreadyExistsException("Submission already exists");
+
+        _repositoryManager.SubmissionRepository.Add(submission);
+        await _repositoryManager.SaveChangesAsync();
+
+        var codeForCreation = new Code
+        {
+            AppUserId = submission.AppUserId,
+            ExerciseId = submission.ExerciseId,
+            SourceCode = string.Empty,
+            Attempts = 0,
+            ProgrammingLanguageId = 1
+        };
+
+        _repositoryManager.CodeRepository.Add(codeForCreation);
+        await _repositoryManager.SaveChangesAsync();
 
         return null;
     }

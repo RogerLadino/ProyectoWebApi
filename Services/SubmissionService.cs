@@ -78,24 +78,26 @@ public class SubmissionService : ISubmissionService
             .FindByConditionAsync(s => s.ExerciseId == exerciseId && s.AppUserId == userId))
             .FirstOrDefault();
 
-        if (submission == null)
+        if (submission != null)
         {
-            await CreateAsync(new SubmissionCreationDto
-            {
-                AppUserId = userId,
-                ExerciseId = exerciseId,
-                Grade = grade,
-                Status = 0,
-                SubmittedAt = null
-            });
+            submission.Grade = grade;
 
+           _repositoryManager.SubmissionRepository.Update(submission);
+            await _repositoryManager.SaveChangesAsync();
             return;
         }
 
-        submission.Grade = grade;
 
-        _repositoryManager.SubmissionRepository.Update(submission);
-        await _repositoryManager.SaveChangesAsync();
+        var submissionDto = new SubmissionCreationDto
+        {
+            AppUserId = userId,
+            ExerciseId = exerciseId,
+            Grade = grade,
+            Status = 0,
+            SubmittedAt = DateTime.MaxValue
+        };
+
+        await CreateAsync(submissionDto);
     }
 
     public async Task<SubmissionDto> CreateAsync(SubmissionCreationDto submissionForCreationDto)
@@ -109,19 +111,8 @@ public class SubmissionService : ISubmissionService
         if (submissionExists)
             throw new SubmissionAlreadyExistsException("Submission already exists");
 
+
         _repositoryManager.SubmissionRepository.Add(submission);
-        await _repositoryManager.SaveChangesAsync();
-
-        var code = new Code
-        {
-            AppUserId = submission.AppUserId,
-            ExerciseId = submission.ExerciseId,
-            SourceCode = string.Empty,
-            Attempts = 0,
-            ProgrammingLanguageId = 1
-        };
-
-        _repositoryManager.CodeRepository.Add(code);
         await _repositoryManager.SaveChangesAsync();
 
         return submission.Adapt<SubmissionDto>();
