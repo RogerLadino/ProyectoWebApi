@@ -6,20 +6,13 @@ using System.Security.Claims;
 
 [Authorize]
 [ApiController]
-[Route("api/exercises")]
+[Route("api/classroom/{classroomId:int}/exercise")]
 public class ExercisesController : ControllerBase
 {
     private readonly IServiceManager _serviceManager;
 
     public ExercisesController(IServiceManager serviceManager)
         => _serviceManager = serviceManager;
-
-    [HttpGet("Profile")]
-    public async Task<IActionResult> Profile()
-    {
-        var userId = User.FindFirstValue(ClaimTypes.Role);
-        return Ok(userId);
-    }
 
     [HttpGet]
     public async Task<IActionResult> GetAllExercises()
@@ -35,13 +28,15 @@ public class ExercisesController : ControllerBase
         return Ok(exerciseDto);
     }
 
+    [Authorize(Roles = "Profesor")]
     [HttpPost]
-    public async Task<IActionResult> CreateExercise([FromBody] ExerciseCreationDto exerciseForCreationDto)
+    public async Task<IActionResult> CreateExercise([FromRoute] int classroomId, [FromBody] ExerciseCreationDto exerciseForCreationDto)
     {
-        var createdExercise = await _serviceManager.ExerciseService.CreateAsync(exerciseForCreationDto);
-        return CreatedAtAction(nameof(GetExerciseById), new { exerciseId = createdExercise.Id }, createdExercise);
+        var createdExercise = await _serviceManager.ExerciseService.CreateAsync(classroomId, exerciseForCreationDto);
+        return CreatedAtAction(nameof(GetExerciseById), new { exerciseId = createdExercise.Id, classroomId = createdExercise.ClassroomId }, createdExercise);
     }
 
+    [Authorize(Roles = "Profesor")]
     [HttpPut("{exerciseId:int}")]
     public async Task<IActionResult> UpdateExercise(int exerciseId, [FromBody] ExerciseDto exerciseForUpdateDto)
     {
@@ -49,6 +44,7 @@ public class ExercisesController : ControllerBase
         return NoContent();
     }
 
+    [Authorize(Roles = "Profesor")]
     [HttpDelete("{exerciseId:int}")]
     public async Task<IActionResult> DeleteExercise(int exerciseId)
     {

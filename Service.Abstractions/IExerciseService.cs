@@ -4,5 +4,5 @@ namespace Service.Abstractions;
 
 public interface IExerciseService : IServiceBase<ExerciseDto>
 {
-    Task<ExerciseDto> CreateAsync(ExerciseCreationDto exerciseCreationDto);
+    Task<ExerciseDto> CreateAsync(int classroomId, ExerciseCreationDto exerciseCreationDto);
 }

@@ -14,6 +14,12 @@ public class ExerciseConfiguration : IEntityTypeConfiguration<Exercise>
         builder.Property(e => e.Description).IsRequired();
         builder.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
 
+        builder.HasMany(e => e.TestCases)
+            .WithOne(tc => tc.Exercise)
+            .HasForeignKey(tc => tc.ExerciseId)
+            .OnDelete(DeleteBehavior.Cascade)
+            .HasConstraintName("FK__TestCase__Exercise");
+
         builder.HasOne(d => d.Classroom)
             .WithMany(p => p.Exercises)
             .HasForeignKey(d => d.ClassroomId)

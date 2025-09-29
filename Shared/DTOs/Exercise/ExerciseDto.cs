@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Domain.Entities;
+using Shared.DTOs.TestCase;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Shared.DTOs.Exercise;
@@ -21,4 +23,7 @@ public partial class ExerciseDto
 
     [Column(TypeName = "datetime")]
     public DateTime? CreatedAt { get; set; }
+
+    [InverseProperty("Exercise")]
+    public virtual ICollection<TestCaseDto> TestCases { get; set; } = new List<TestCaseDto>();
 }
