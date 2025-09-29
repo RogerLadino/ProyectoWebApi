@@ -1,4 +1,5 @@
-﻿using LoggingService;
+﻿using Domain.Exceptions;
+using LoggingService;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,6 +17,8 @@ internal sealed class GlobalExceptionHandler(
         httpContext.Response.StatusCode = exception switch
         {
             ApplicationException => StatusCodes.Status400BadRequest,
+            ClassroomAlreadyExistsException => StatusCodes.Status400BadRequest,
+            ExerciseNotFoundException => StatusCodes.Status404NotFound,
             _ => StatusCodes.Status500InternalServerError
         };
 
