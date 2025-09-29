@@ -9,6 +9,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Core.Exceptions;
 using System.Text;
+using Mapster;
 
 
 namespace Core.Services
@@ -24,6 +25,16 @@ namespace Core.Services
             _repositoryManager = repositoryManager;
             _emailService = emailService;
             _configuration = configuration;
+        }
+
+        public async Task<AppUserDto> Profile(int appUserId)
+        {
+            var appUser = await _repositoryManager.UsuarioRepository.GetByIdAsync(appUserId);
+
+            if (appUser is null)
+                throw new KeyNotFoundException("No user exists with given ID");
+
+            return appUser.Adapt<AppUserDto>();
         }
 
         public async Task<string?> LoginAsync(LoginDTO loginDto)
