@@ -4,6 +4,7 @@ using Domain.Repositories;
 using Mapster;
 using Service.Abstractions;
 using Shared.DTOs.Submission;
+using Shared.DTOs.Users;
 
 namespace Services;
 public class SubmissionService : ISubmissionService
@@ -17,10 +18,39 @@ public class SubmissionService : ISubmissionService
 
     public async Task<IEnumerable<SubmissionDto>> GetAllAsync(int exerciseId)
     {
+        var exercise = await _repositoryManager.ExerciseRepository.GetByIdAsync(exerciseId);
+
         var submissions = await _repositoryManager.SubmissionRepository
             .FindByConditionAsync(s => s.ExerciseId == exerciseId);
 
-        return submissions.Adapt<IEnumerable<SubmissionDto>>();
+        var classroom = await _repositoryManager.ClassroomRepository
+            .GetByIdWithUsersAsync(exercise.ClassroomId);
+
+        var submissionDict = submissions
+            .ToDictionary(s => s.AppUserId, s => s.Adapt<SubmissionDto>());
+
+        var result = classroom.AppUsers
+            .Where(user => user.AppRoleId != 1)
+            .Select(user =>
+            {
+                if (submissionDict.TryGetValue(user.Id, out var existingSubmission))
+                {
+                    existingSubmission.AppUser = user.Adapt<AppUserDto>();
+                    return existingSubmission;
+                }
+
+                return new SubmissionDto
+                {
+                    AppUserId = user.Id,
+                    ExerciseId = exerciseId,
+                    Grade = 0,
+                    Status = 0,
+                    SubmittedAt = null,
+                    AppUser = user.Adapt<AppUserDto>()
+                };
+            });
+
+        return result;
     }
 
     public async Task<SubmissionDto> GetByIdAsync(int userId, int exerciseId)
