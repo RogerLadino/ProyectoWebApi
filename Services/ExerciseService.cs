@@ -4,6 +4,7 @@ using Domain.Repositories;
 using Service.Abstractions;
 using Domain.Exceptions;
 using Mapster;
+using Domain.Exceptions.Code;
 
 namespace Services;
 

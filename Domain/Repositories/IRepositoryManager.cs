@@ -13,5 +13,4 @@ public interface IRepositoryManager
 
     IClassroomRepository ClassroomRepository { get; }
     IUserClassroomRepository UserClassroomRepository { get; }
-    object UserRepository { get; set; }
 }

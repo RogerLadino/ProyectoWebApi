@@ -7,23 +7,25 @@ using Service.Abstractions;
 using Shared.DTOs.Code;
 using Shared.DTOs.Submission;
 
+namespace Services;
+
 public class CodeService : ICodeService
 {
     private readonly IRepositoryManager _repositoryManager;
     private readonly IRealtimeManager _realtimeManager;
-    private readonly IServiceManager _serviceManager;
+    private readonly ISubmissionService _submissionService;
 
-    public CodeService(IRepositoryManager repositoryManager, IRealtimeManager realtimeManager, IServiceManager serviceManager)
+    public CodeService(IRepositoryManager repositoryManager, IRealtimeManager realtimeManager, ISubmissionService submissionService)
     {
         _repositoryManager = repositoryManager;
         _realtimeManager = realtimeManager;
-        _serviceManager = serviceManager;
+        _submissionService = submissionService;
     }
 
     public async Task<CodeUpdateDto?> GetByIdAsync(int exerciseId, int userId)
     {
         var code = (await _repositoryManager.CodeRepository.FindByConditionAsync(
-            c => c.AppUserId.Equals(dto.AppUserId) && c.ExerciseId.Equals(dto.ExerciseId)))
+            c => c.AppUserId.Equals(userId) && c.ExerciseId.Equals(exerciseId)))
             .FirstOrDefault();
 
         if (code is not null)
@@ -32,7 +34,7 @@ public class CodeService : ICodeService
         }
 
 
-        await _serviceManager.SubmissionService.CreateAsync(new SubmissionCreationDto
+        await _submissionService.CreateAsync(new SubmissionCreationDto
         {
             AppUserId = userId,
             ExerciseId = exerciseId,

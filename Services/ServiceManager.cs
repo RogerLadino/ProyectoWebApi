@@ -22,7 +22,7 @@ public sealed class ServiceManager : IServiceManager
         _lazyEmailService = new Lazy<IEmailService>(() => new EmailService(configuration));
         _lazyAuthService = new Lazy<IAuthService>(() => new AuthService(repositoryManager, _lazyEmailService.Value, configuration));
         _lazySubmissionService = new Lazy<ISubmissionService>(() => new SubmissionService(repositoryManager));
-        _lazyCodeService = new Lazy<ICodeService>(() => new CodeService(repositoryManager, realtimeManager));
+        _lazyCodeService = new Lazy<ICodeService>(() => new CodeService(repositoryManager, realtimeManager, _lazySubmissionService.Value));
     }
 
     public IEmailService EmailService => _lazyEmailService.Value;
