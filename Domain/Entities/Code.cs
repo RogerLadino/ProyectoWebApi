@@ -25,5 +25,5 @@ public partial class Code
 
     [ForeignKey("AppUserId, ExerciseId")]
     [InverseProperty("Code")]
-    public virtual Submission Submission { get; set; } = null!;
+    public virtual Submission? Submission { get; set; } = null!;
 }

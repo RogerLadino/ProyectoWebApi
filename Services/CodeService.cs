@@ -14,16 +14,14 @@ public class CodeService : ICodeService
 {
     private readonly IRepositoryManager _repositoryManager;
     private readonly IRealtimeManager _realtimeManager;
-    private readonly ISubmissionService _submissionService;
 
-    public CodeService(IRepositoryManager repositoryManager, IRealtimeManager realtimeManager, ISubmissionService submissionService)
+    public CodeService(IRepositoryManager repositoryManager, IRealtimeManager realtimeManager)
     {
         _repositoryManager = repositoryManager;
         _realtimeManager = realtimeManager;
-        _submissionService = submissionService;
     }
 
-    public async Task<CodeUpdateDto?> GetByIdAsync(int exerciseId, int userId)
+    public async Task<CodeUpdateDto> GetByIdAsync(int exerciseId, int userId)
     {
         var code = (await _repositoryManager.CodeRepository.FindByConditionAsync(
             c => c.AppUserId.Equals(userId) && c.ExerciseId.Equals(exerciseId)))
@@ -34,40 +32,25 @@ public class CodeService : ICodeService
             return code.Adapt<CodeUpdateDto>();
         }
 
-        var submissionForCreationDto = new SubmissionCreationDto
-        {
-            AppUserId = userId,
-            ExerciseId = exerciseId,
-            Grade = 0,
-            Status = 0,
-            SubmittedAt = null
-        };
-
-        var submission = submissionForCreationDto.Adapt<Submission>();
-
-        var submissionExists = await _repositoryManager.SubmissionRepository
-            .AnyAsync(s => s.ExerciseId == submission.ExerciseId
-                        && s.AppUserId == submission.AppUserId);
-
-        if (submissionExists)
-            throw new SubmissionAlreadyExistsException("Submission already exists");
-
-        _repositoryManager.SubmissionRepository.Add(submission);
-        await _repositoryManager.SaveChangesAsync();
+        var submission = (await _repositoryManager.SubmissionRepository.FindByConditionAsync(
+            s => s.AppUserId.Equals(userId) && s.ExerciseId.Equals(exerciseId)
+        ))
+        .FirstOrDefault();
 
         var codeForCreation = new Code
         {
-            AppUserId = submission.AppUserId,
-            ExerciseId = submission.ExerciseId,
+            AppUserId = userId,
+            ExerciseId = exerciseId,
             SourceCode = string.Empty,
             Attempts = 0,
-            ProgrammingLanguageId = 1
+            ProgrammingLanguageId = 1,
+            Submission = submission
         };
 
         _repositoryManager.CodeRepository.Add(codeForCreation);
         await _repositoryManager.SaveChangesAsync();
 
-        return null;
+        return codeForCreation.Adapt<CodeUpdateDto>();
     }
 
     public async Task UpdateCodeAsync(CodeUpdateDto dto)
@@ -79,9 +62,7 @@ public class CodeService : ICodeService
         if (code is null)
             throw new CodeNotFoundException("Code not found");
 
-        dto.Adapt<Code>();
-
-        _repositoryManager.CodeRepository.Update(code);
+        dto.Adapt(code);
 
         await _repositoryManager.SaveChangesAsync();
 

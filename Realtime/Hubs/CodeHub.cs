@@ -22,7 +22,7 @@ public class CodeHub : Hub
     {
         await Groups.AddToGroupAsync(Context.ConnectionId, $"exercise-{exerciseId}-{userId}");
 
-        var code = await _serviceManager.CodeService.GetByIdAsync(userId, exerciseId);
+        var code = await _serviceManager.CodeService.GetByIdAsync(exerciseId, userId);
 
         await Clients.Caller.SendAsync("CodeInitialized", code);
     }

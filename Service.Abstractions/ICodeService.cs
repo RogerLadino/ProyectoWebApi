@@ -4,6 +4,6 @@ namespace Service.Abstractions;
 
 public interface ICodeService
 {
-    Task<CodeUpdateDto?> GetByIdAsync(int exerciseId, int userId);
+    Task<CodeUpdateDto> GetByIdAsync(int exerciseId, int userId);
     Task UpdateCodeAsync(CodeUpdateDto dto);
 }
