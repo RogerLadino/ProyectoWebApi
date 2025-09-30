@@ -11,4 +11,7 @@ public interface IClassroomService
     Task<ClassroomDto> GetByIdAsync(int id);
     Task DeleteAsync(int id);
     Task<IEnumerable<ClassroomDto>> GetByUserIdAsync(string userId); // Cambiado el tipo de retorno
+    Task<ClassroomDto> CreateAndAssignProfessorAsync(ClassroomCreationDto classroomForCreationDto, string userId);
+
+    Task JoinClassroomByCodeAsync(string code, string userId);
 }
