@@ -61,8 +61,6 @@ public class SubmissionService : ISubmissionService
             .FindByConditionAsync(s => s.ExerciseId == exerciseId && s.AppUserId == userId))
             .FirstOrDefault();
 
-        var user = await _repositoryManager.UsuarioRepository.GetByIdAsync(submission.AppUserId);
-
         if (submission == null)
             return new SubmissionDto
             {
@@ -72,6 +70,8 @@ public class SubmissionService : ISubmissionService
                 Status = 0,
                 SubmittedAt = null
             };
+
+        var user = await _repositoryManager.UsuarioRepository.GetByIdAsync(submission.AppUserId);
 
         if(user == null)
         {
