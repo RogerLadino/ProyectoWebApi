@@ -2,6 +2,7 @@
 using Domain.Exceptions.Exceptions;
 using Domain.Repositories;
 using Mapster;
+using Microsoft.IdentityModel.Tokens;
 using Service.Abstractions;
 using Shared.DTOs.Submission;
 using Shared.DTOs.Users;
@@ -55,9 +56,12 @@ public class SubmissionService : ISubmissionService
 
     public async Task<SubmissionDto> GetByIdAsync(int userId, int exerciseId)
     {
+
         var submission = (await _repositoryManager.SubmissionRepository
             .FindByConditionAsync(s => s.ExerciseId == exerciseId && s.AppUserId == userId))
             .FirstOrDefault();
+
+        var user = await _repositoryManager.UsuarioRepository.GetByIdAsync(submission.AppUserId);
 
         if (submission == null)
             return new SubmissionDto
@@ -68,6 +72,13 @@ public class SubmissionService : ISubmissionService
                 Status = 0,
                 SubmittedAt = null
             };
+
+        if(user == null)
+        {
+            throw new KeyNotFoundException("User not found");
+        }
+
+        submission.AppUser = user;
 
         return submission.Adapt<SubmissionDto>();
     }

@@ -15,10 +15,10 @@ public class SubmissionRepository : RepositoryBase<Submission>, ISubmissionRepos
             .Include(s => s.AppUser)
             .ToListAsync();
     }
-    public new async Task<Submission?> GetByIdAsync(int id)
+    public new async Task<Submission?> GetByIdAsync(int exerciseId, int id)
     {
         return await _dbSet
             .Include(s => s.AppUser)
-            .FirstOrDefaultAsync(s => s.AppUserId.Equals(id));
+            .FirstOrDefaultAsync(s => s.AppUserId.Equals(id) && s.ExerciseId.Equals(exerciseId));
     }
 }

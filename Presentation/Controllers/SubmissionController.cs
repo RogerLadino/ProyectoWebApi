@@ -34,6 +34,13 @@ public class SubmissionController : ControllerBase
         return Ok(submissionDto);
     }
 
+    [HttpGet("user/{userId:int}")]
+    public async Task<IActionResult> GetUserSubmission([FromRoute] int exerciseId, [FromRoute] int userId)
+    {
+        var submissionDto = await _serviceManager.SubmissionService.GetByIdAsync(userId, exerciseId);
+        return Ok(submissionDto);
+    }
+
     [Authorize(Roles = "Profesor")]
     [HttpPut]
     public async Task<IActionResult> AssignNote([FromRoute] int exerciseId, [FromBody] AssignGradeDto assignGradeDto)
