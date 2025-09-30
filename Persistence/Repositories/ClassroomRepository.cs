@@ -37,5 +37,6 @@ namespace Persistence.Repositories
                 .Where(c => c.Id == classroomId)
                 .AnyAsync(c => c.AppUsers.Any(u => u.Id == userIdInt));
         }
+
     }
 }
