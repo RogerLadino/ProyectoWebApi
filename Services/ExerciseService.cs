@@ -78,4 +78,5 @@ public class ExerciseService : IExerciseService
         _repositoryManager.ExerciseRepository.Remove(exercise);
         await _repositoryManager.SaveChangesAsync();
     }
+
 }

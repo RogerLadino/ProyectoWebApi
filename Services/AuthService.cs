@@ -118,7 +118,7 @@ namespace Core.Services
                 {
                     new Claim(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
                     new Claim(ClaimTypes.Email, usuario.Email),
-                    new Claim(ClaimTypes.Role, usuario.AppRole.Description)
+                    new Claim(ClaimTypes.Role, usuario.AppRole.Description.ToLower())
                 }),
                 Expires = DateTime.UtcNow.AddMinutes(double.Parse(_configuration["JwtSettings:ExpirationInMinutes"]!)),
                 Issuer = _configuration["JwtSettings:Issuer"],

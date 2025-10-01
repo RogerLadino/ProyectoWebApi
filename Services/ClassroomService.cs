@@ -122,20 +122,19 @@ public class ClassroomService : IClassroomService
 
     public async Task DeleteAsync(int classroomId)
     {
-        var classroom = await _repositoryManager.ClassroomRepository.GetByIdAsync(classroomId);
+        var classroom = await _repositoryManager.ClassroomRepository.GetByIdWithUsersAsync(classroomId);
         if (classroom is null)
             throw new ClassroomNotFoundException("No classroom exists with the given ID");
-
+        // limpiar relaciones many-to-many
+        classroom.AppUsers.Clear();
         _repositoryManager.ClassroomRepository.Remove(classroom);
         await _repositoryManager.SaveChangesAsync();
     }
-
-    public async Task<ClassroomDto> GetByCodeAsync(string code)
+    public async Task<ClassroomDto> GetByCodeAsync(string code) 
     {
         var classroom = await _repositoryManager.ClassroomRepository.GetByCodeAsync(code);
         if (classroom is null)
             throw new ClassroomNotFoundException("No classroom exists with the given code");
-
         return classroom.Adapt<ClassroomDto>();
     }
 
