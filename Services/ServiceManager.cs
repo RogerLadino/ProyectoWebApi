@@ -22,6 +22,8 @@ public sealed class ServiceManager : IServiceManager
         _lazyExerciseService = new Lazy<IExerciseService>(() => new ExerciseService(repositoryManager));
         _lazyEmailService = new Lazy<IEmailService>(() => new EmailService(configuration));
         _lazyAuthService = new Lazy<IAuthService>(() => new AuthService(repositoryManager, _lazyEmailService.Value, configuration));
+        _lazyClassroomService = new Lazy<IClassroomService>(() => new ClassroomService(repositoryManager));
+
     }
 
     public IEmailService EmailService => _lazyEmailService.Value;

@@ -1,23 +1,20 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 using Service.Abstractions;
 using Shared.DTOs.Classroom;
-
-namespace Presentation.Controllers;
+using System.Security.Claims;
 
 [ApiController]
 [Route("api/classroom")]
 public class ClassroomController : ControllerBase
 {
-    private readonly IClassroomService _classroomService;
+    private readonly IServiceManager _serviceManager;
 
-    public ClassroomController(IClassroomService classroomService)
+    public ClassroomController(IServiceManager serviceManager)
     {
-        _classroomService = classroomService;
+        _serviceManager = serviceManager;
     }
 
-    // Reemplaza la línea problemática en el método GetMyClassrooms
     [Authorize]
     [HttpGet("my-classrooms")]
     public async Task<ActionResult> GetMyClassrooms()
@@ -26,16 +23,11 @@ public class ClassroomController : ControllerBase
         if (string.IsNullOrEmpty(userId))
             return Unauthorized("No se pudo obtener el usuario logueado.");
 
-        // El método GetByUserIdAsync devuelve Task, no un resultado.
-        await _classroomService.GetByUserIdAsync(userId);
-        return Ok(); // O ajusta el método de servicio para devolver datos si es necesario.
+        var classrooms = await _serviceManager.ClassroomService.GetByUserIdAsync(userId);
+        return Ok(classrooms);
     }
 
-    // Reemplaza la línea que causa el error en el método Create por la llamada existente en la interfaz IClassroomService.
-    // La interfaz no tiene el método CreateAndAssignProfessorAsync, pero sí tiene CreateAsync.
-    // Puedes agregar la lógica de asignación de profesor en el servicio, si es necesario, pero aquí solo puedes llamar a CreateAsync.
-
-    [Authorize(Roles = "Profesor")]
+    [Authorize(Roles = "profesor")]
     [HttpPost]
     public async Task<ActionResult> Create([FromBody] ClassroomCreationDto creationDto)
     {
@@ -43,16 +35,11 @@ public class ClassroomController : ControllerBase
         if (string.IsNullOrEmpty(userId))
             return Unauthorized("No se pudo obtener el usuario logueado.");
 
-        // Llama al método existente en la interfaz
-        var createdClassroom = await _classroomService.CreateAsync(creationDto);
+        var createdClassroom = await _serviceManager.ClassroomService.CreateAndAssignProfessorAsync(creationDto, userId);
         return CreatedAtAction(nameof(GetById), new { id = createdClassroom.Id }, createdClassroom);
     }
 
-    // Reemplaza el método JoinByCode para corregir el error CS1061.
-    // Elimina la llamada a JoinClassroomByCodeAsync y utiliza GetByCodeAsync para obtener el aula por código.
-    // Si necesitas lógica adicional para que el usuario se una al aula, deberás implementarla en el servicio y la interfaz.
-
-    [Authorize(Roles = "Alumno")]
+    [Authorize(Roles = "alumno")]
     [HttpPost("join/{code}")]
     public async Task<ActionResult> JoinByCode(string code)
     {
@@ -60,33 +47,28 @@ public class ClassroomController : ControllerBase
         if (string.IsNullOrEmpty(userId))
             return Unauthorized("No se pudo obtener el usuario logueado.");
 
-        var classroom = await _classroomService.GetByCodeAsync(code);
-        if (classroom == null)
-            return NotFound(new { Message = "No se encontró un aula con ese código." });
-
-        // Aquí podrías agregar lógica para asociar el usuario al aula si existe un método en el servicio.
-        // Por ahora, solo retorna el aula encontrada.
-        return Ok(new { Message = "Aula encontrada.", Classroom = classroom });
+        await _serviceManager.ClassroomService.JoinClassroomByCodeAsync(code, userId);
+        return Ok(new { Message = "Te has unido correctamente al aula." });
     }
 
-    // Los demás endpoints pueden quedar igual
     [HttpGet("{id}")]
     public async Task<ActionResult> GetById(int id)
     {
-        var classroom = await _classroomService.GetByIdAsync(id);
+        var classroom = await _serviceManager.ClassroomService.GetByIdAsync(id);
         return Ok(classroom);
     }
 
     [HttpPut("{id}")]
     public async Task<ActionResult> Update(int id, [FromBody] ClassroomUpdateDto updateDto)
     {
-        await _classroomService.UpdateAsync(id, updateDto);
+        await _serviceManager.ClassroomService.UpdateAsync(id, updateDto);
         return NoContent();
     }
+
     [HttpDelete("{id}")]
     public async Task<ActionResult> Delete(int id)
     {
-        await _classroomService.DeleteAsync(id);
+        await _serviceManager.ClassroomService.DeleteAsync(id);
         return NoContent();
     }
 }
