@@ -1,4 +1,5 @@
 ﻿using Domain.Repositories;
+using System.Runtime.CompilerServices;
 
 namespace Persistence.Repositories
 {
@@ -10,6 +11,8 @@ namespace Persistence.Repositories
         private readonly Lazy<IClassroomRepository> _lazyClassroomRepository;
         private readonly Lazy<IUsuarioRepository> _lazyUsuarioRepository;
         private readonly Lazy<IUserClassroomRepository> _lazyUserClassroomRepository;
+        private readonly Lazy<ISubmissionRepository> _lazySubmissionRepository;
+        private readonly Lazy<ICodeRepository> _lazyCodeRepository;
 
         public RepositoryManager(RepositoryDbContext dbContext)
         {
@@ -19,14 +22,16 @@ namespace Persistence.Repositories
             _lazyClassroomRepository = new Lazy<IClassroomRepository>(() => new ClassroomRepository(_dbContext));
             _lazyUsuarioRepository = new Lazy<IUsuarioRepository>(() => new UsuarioRepository(_dbContext));
             _lazyUserClassroomRepository = new Lazy<IUserClassroomRepository>(() => new UserClassroomRepository(_dbContext));
+            _lazySubmissionRepository = new Lazy<ISubmissionRepository>(() => new SubmissionRepository(_dbContext));
+            _lazyCodeRepository = new Lazy<ICodeRepository>(() => new CodeRepository(_dbContext));
         }
 
         public IClassroomRepository ClassroomRepository => _lazyClassroomRepository.Value;
         public IExerciseRepository ExerciseRepository => _lazyExerciseRepository.Value;
         public IUsuarioRepository UsuarioRepository => _lazyUsuarioRepository.Value;
         public IUserClassroomRepository UserClassroomRepository => _lazyUserClassroomRepository.Value;
-
-        object IRepositoryManager.UserRepository { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public ISubmissionRepository SubmissionRepository => _lazySubmissionRepository.Value;
+        public ICodeRepository CodeRepository => _lazyCodeRepository.Value;
 
         public async Task SaveChangesAsync()
         {

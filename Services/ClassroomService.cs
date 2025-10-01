@@ -91,12 +91,6 @@ public class ClassroomService : IClassroomService
         // Generar automáticamente un código único
         classroom.Code = await GenerateUniqueCodeAsync();
 
-        var classroomExists = await _repositoryManager.ClassroomRepository
-            .AnyAsync(e => e.Name.Equals(classroom.Name) && e.Id != classroom.Id);
-
-        if (classroomExists)
-            throw new ClassroomAlreadyExistsException("A classroom with the same name already exists");
-
         _repositoryManager.ClassroomRepository.Add(classroom);
         await _repositoryManager.SaveChangesAsync();
 

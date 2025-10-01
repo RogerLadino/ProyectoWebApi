@@ -1,10 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Domain.Entities;
+namespace Shared.DTOs.Code;
 
-[Table("Code")]
-public partial class Code
+public partial class CodeDto
 {
     [Key]
     public int AppUserId { get; set; }
@@ -18,12 +17,4 @@ public partial class Code
     public int Attempts { get; set; }
 
     public int ProgrammingLanguageId { get; set; }
-
-    [ForeignKey("ProgrammingLanguageId")]
-    [InverseProperty("Codes")]
-    public virtual ProgrammingLanguage ProgrammingLanguage { get; set; } = null!;
-
-    [ForeignKey("AppUserId, ExerciseId")]
-    [InverseProperty("Code")]
-    public virtual Submission? Submission { get; set; } = null!;
 }

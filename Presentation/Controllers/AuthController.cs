@@ -6,6 +6,7 @@ using Shared.DTOs.Users;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using System.Threading.Tasks;
@@ -21,6 +22,20 @@ namespace ClassroomApi.Infrastructure.Presentation.Controllers
         public AuthController(IServiceManager serviceManager)
         {
             _serviceManager = serviceManager;
+        }
+
+        [Authorize]
+        [HttpGet("perfil")]
+        public async Task<IActionResult> Perfil()
+        {
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(userIdStr) || !int.TryParse(userIdStr, out var userId))
+                return Unauthorized("UserId not found or invalid");
+
+            var appUser = await _serviceManager.AuthService.Profile(userId);
+
+            return Ok(appUser);
         }
 
         [HttpPost("registro")]

@@ -1,8 +1,11 @@
+using Domain.Realtime;
 using Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
 using OrdenesCompra.Extensions;
 using Persistence;
 using Persistence.Repositories;
+using Realtime.Hubs;
+using Realtime.Services;
 using Serilog;
 using Service.Abstractions;
 using Services;
@@ -38,6 +41,11 @@ builder.Services.AddScoped<IServiceManager, ServiceManager>();
 builder.Services.AddScoped<IRepositoryManager, RepositoryManager>();
 builder.Services.AddScoped<IClassroomService, ClassroomService>();
 builder.Services.AddScoped<IClassroomRepository, ClassroomRepository>();
+
+// Realtime
+
+builder.Services.AddSignalR();
+builder.Services.AddScoped<IRealtimeManager, RealtimeManager>();
 
 // Middlewares
 
@@ -118,5 +126,7 @@ app.UseCors("CorsPolicy");
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapHub<CodeHub>("/hubs/code");
 
 app.Run();
