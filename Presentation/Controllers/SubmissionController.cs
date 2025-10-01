@@ -41,7 +41,6 @@ public class SubmissionController : ControllerBase
         return Ok(submissionDto);
     }
 
-    [Authorize(Roles = "Profesor")]
     [HttpPut]
     public async Task<IActionResult> AssignNote([FromRoute] int exerciseId, [FromBody] AssignGradeDto assignGradeDto)
     {
