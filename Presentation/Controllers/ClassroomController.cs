@@ -27,7 +27,7 @@ public class ClassroomController : ControllerBase
         return Ok(classrooms);
     }
 
-    [Authorize(Roles = "profesor")]
+    [Authorize(Roles = "Profesor")]
     [HttpPost]
     public async Task<ActionResult> Create([FromBody] ClassroomCreationDto creationDto)
     {
@@ -39,7 +39,7 @@ public class ClassroomController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = createdClassroom.Id }, createdClassroom);
     }
 
-    [Authorize(Roles = "alumno")]
+    [Authorize(Roles = "Alumno")]
     [HttpPost("join/{code}")]
     public async Task<ActionResult> JoinByCode(string code)
     {

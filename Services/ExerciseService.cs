@@ -17,10 +17,14 @@ public class ExerciseService : IExerciseService
         _repositoryManager = repositoryManager;
     }
 
-    public async Task<IEnumerable<ExerciseDto>> GetAllAsync()
+    public async Task<IEnumerable<ExerciseDto>> GetAllAsync(int classroomId)
     {
         var exercises = await _repositoryManager.ExerciseRepository.GetAllAsync();
-        return exercises.Adapt<IEnumerable<ExerciseDto>>();
+
+        var filtered = exercises
+            .Where(e => e.ClassroomId == classroomId);
+
+        return filtered.Adapt<IEnumerable<ExerciseDto>>();
     }
 
     public async Task<ExerciseDto> GetByIdAsync(int exerciseId)

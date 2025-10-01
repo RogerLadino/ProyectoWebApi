@@ -15,9 +15,9 @@ public class ExercisesController : ControllerBase
         => _serviceManager = serviceManager;
 
     [HttpGet]
-    public async Task<IActionResult> GetAllExercises()
+    public async Task<IActionResult> GetAllExercises(int classroomId)
     {
-        var exercisesDto = await _serviceManager.ExerciseService.GetAllAsync();
+        var exercisesDto = await _serviceManager.ExerciseService.GetAllAsync(classroomId);
         return Ok(exercisesDto);
     }
 
