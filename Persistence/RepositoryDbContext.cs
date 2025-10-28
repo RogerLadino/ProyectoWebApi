@@ -31,7 +31,10 @@ public partial class RepositoryDbContext : DbContext
     public virtual DbSet<TestCase> TestCases { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {}
+    {
+        // Este método se deja intencionalmente vacío porque la configuración del DbContext
+        // se realiza externamente en Program.cs mediante la inyección de dependencias.
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
