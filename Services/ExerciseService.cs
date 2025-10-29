@@ -37,10 +37,10 @@ public class ExerciseService : IExerciseService
         return exercise.Adapt<ExerciseDto>();
     }
 
-    public async Task<ExerciseDto> CreateAsync(int classroomId, ExerciseCreationDto exerciseForCreationDto)
+    public async Task<ExerciseDto> CreateAsync(int classroomId, ExerciseCreationDto exerciseCreationDto)
     {
-        exerciseForCreationDto.ClassroomId = classroomId;
-        var exercise = exerciseForCreationDto.Adapt<Exercise>();
+        exerciseCreationDto.ClassroomId = classroomId;
+        var exercise = exerciseCreationDto.Adapt<Exercise>();
 
         var exerciseExists = await _repositoryManager.ExerciseRepository
             .AnyAsync(e => e.Name.Equals(exercise.Name) && e.ClassroomId.Equals(exercise.ClassroomId));
