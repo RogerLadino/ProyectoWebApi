@@ -72,9 +72,9 @@ public class ExerciseService : IExerciseService
         await _repositoryManager.SaveChangesAsync();
     }
 
-    public async Task DeleteAsync(int exerciseId)
+    public async Task DeleteAsync(int id)
     {
-        var exercise = await _repositoryManager.ExerciseRepository.GetByIdAsync(exerciseId);
+        var exercise = await _repositoryManager.ExerciseRepository.GetByIdAsync(id);
 
         if (exercise is null)
             throw new ExerciseNotFoundException("No exercise exists with the given ID");
