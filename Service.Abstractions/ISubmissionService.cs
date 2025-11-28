@@ -1,4 +1,5 @@
-﻿using Shared.DTOs.Submission;
+﻿using Shared.DTOs.Exercise;
+using Shared.DTOs.Submission;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,5 +17,7 @@ namespace Service.Abstractions
         Task AssignGrade(int userId, int exerciseId, int grade);
 
         Task<SubmissionDto> CreateAsync(SubmissionCreationDto submissionCreationDto);
+
+        Task<ExerciseWithSubmissionsDto[]> GetClassroomSubmissions(int classroomId);
     }
 }

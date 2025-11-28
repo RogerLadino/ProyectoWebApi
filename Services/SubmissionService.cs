@@ -4,6 +4,7 @@ using Domain.Repositories;
 using Mapster;
 using Microsoft.IdentityModel.Tokens;
 using Service.Abstractions;
+using Shared.DTOs.Exercise;
 using Shared.DTOs.Submission;
 using Shared.DTOs.Users;
 
@@ -127,5 +128,65 @@ public class SubmissionService : ISubmissionService
         await _repositoryManager.SaveChangesAsync();
 
         return submission.Adapt<SubmissionDto>();
+    }
+
+    public async Task<ExerciseWithSubmissionsDto[]> GetClassroomSubmissions(int classroomId)
+    {
+        var classroom = await _repositoryManager.ClassroomRepository
+            .GetByIdWithUsersAsync(classroomId);
+
+        if (classroom == null)
+            return Array.Empty<ExerciseWithSubmissionsDto>();
+
+        var exercises = await _repositoryManager.ExerciseRepository
+            .FindByConditionAsync(e => e.ClassroomId == classroomId);
+
+        var result = new List<ExerciseWithSubmissionsDto>();
+
+        foreach (var exercise in exercises)
+        {
+            var submissions = await _repositoryManager.SubmissionRepository
+                .FindByConditionAsync(s => s.ExerciseId == exercise.Id);
+
+            var submissionDict = submissions
+                .ToDictionary(s => s.AppUserId, s => s.Adapt<SubmissionDto>());
+
+            var exerciseSubmissions = classroom.AppUsers
+                .Where(user => user.AppRoleId != 1)
+                .Select(user =>
+                {
+                    if (submissionDict.TryGetValue(user.Id, out var existingSubmission))
+                    {
+                        existingSubmission.AppUser = user.Adapt<AppUserDto>();
+                        return existingSubmission;
+                    }
+
+                    return new SubmissionDto
+                    {
+                        AppUserId = user.Id,
+                        ExerciseId = exercise.Id,
+                        Grade = 0,
+                        Status = 0,
+                        SubmittedAt = null,
+                        AppUser = user.Adapt<AppUserDto>()
+                    };
+                })
+                .ToList();
+
+            var exerciseWithSubmissions = new ExerciseWithSubmissionsDto
+            {
+                Id = exercise.Id,
+                ClassroomId = exercise.ClassroomId,
+                Name = exercise.Name,
+                Description = exercise.Description,
+                DueDate = exercise.DueDate,
+                CreatedAt = exercise.CreatedAt,
+                Submissions = exerciseSubmissions
+            };
+
+            result.Add(exerciseWithSubmissions);
+        }
+
+        return [.. result];
     }
 }

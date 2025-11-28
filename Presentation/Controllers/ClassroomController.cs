@@ -71,4 +71,12 @@ public class ClassroomController : ControllerBase
         await _serviceManager.ClassroomService.DeleteAsync(id);
         return NoContent();
     }
+
+    [Authorize(Roles = "Profesor")]
+    [HttpGet("{id}/submissions")]
+    public async Task<ActionResult> Submissions(int id)
+    {
+        var submissions = await _serviceManager.SubmissionService.GetClassroomSubmissions(id);
+        return Ok(submissions);
+    }
 }
