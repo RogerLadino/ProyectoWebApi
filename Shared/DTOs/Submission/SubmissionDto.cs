@@ -1,4 +1,5 @@
-﻿using Shared.DTOs.Users;
+﻿using Shared.DTOs.Exercise;
+using Shared.DTOs.Users;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -22,4 +23,7 @@ public partial class SubmissionDto
     [ForeignKey("AppUserId")]
     [InverseProperty("Submissions")]
     public virtual AppUserDto AppUser { get; set; } = null!;
+
+    [ForeignKey("ExerciseId")]
+    public virtual ExerciseDto? Exercise { get; set; }
 }
