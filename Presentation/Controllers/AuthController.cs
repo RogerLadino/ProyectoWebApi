@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Service.Abstractions;
+using System.IdentityModel.Tokens.Jwt;
 using Shared.DTOs.Users;
 using System;
 using System.Collections.Generic;
@@ -10,6 +11,8 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using System.Threading.Tasks;
+
+
 
 namespace ClassroomApi.Infrastructure.Presentation.Controllers
 {
@@ -93,6 +96,36 @@ namespace ClassroomApi.Infrastructure.Presentation.Controllers
             }
 
             return Ok(new { message = "Contraseña restablecida correctamente." });
+        }
+
+        // Nuevo endpoint: POST api/auth/logout
+        // No modifica el constructor: obtiene el servicio de revocación desde RequestServices (opcional).
+        [Authorize]
+        [HttpPost("logout")]
+        public IActionResult Logout()
+        {
+            var authHeader = Request.Headers["Authorization"].FirstOrDefault();
+            if (string.IsNullOrEmpty(authHeader) || !authHeader.StartsWith("Bearer ")) return NoContent();
+
+            var tokenString = authHeader.Substring("Bearer ".Length).Trim();
+            var handler = new JwtSecurityTokenHandler();
+            if (!handler.CanReadToken(tokenString)) return NoContent();
+
+            var jwt = handler.ReadJwtToken(tokenString);
+            var jti = jwt.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Jti)?.Value;
+            if (string.IsNullOrEmpty(jti)) return NoContent();
+
+            DateTime expiresUtc = jwt.ValidTo == DateTime.MinValue ? DateTime.UtcNow : jwt.ValidTo;
+
+            // Obtiene el servicio de revocación si está registrado; si no, no rompe la ejecución.
+            var revocationServiceObj = HttpContext.RequestServices.GetService(typeof(ITokenRevocationService));
+            if (revocationServiceObj is ITokenRevocationService revocationService)
+            {
+                revocationService.RevokeToken(jti, expiresUtc);
+            }
+
+            // El cliente debe eliminar también el token localmente (localStorage / cookie).
+            return NoContent();
         }
     }
 }

@@ -15,6 +15,9 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
+using System.IdentityModel.Tokens.Jwt;
+using System.Threading.Tasks;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Service extensions
@@ -42,6 +45,10 @@ builder.Services.AddScoped<IRepositoryManager, RepositoryManager>();
 builder.Services.AddScoped<IClassroomService, ClassroomService>();
 builder.Services.AddScoped<IClassroomRepository, ClassroomRepository>();
 
+// Registra el servicio de revocación y cache en memoria (líneas añadidas)
+builder.Services.AddMemoryCache();
+builder.Services.AddSingleton<ITokenRevocationService, TokenRevocationService>();
+
 // Realtime
 
 builder.Services.AddSignalR();
@@ -63,7 +70,7 @@ builder.Services.AddAuthentication(options =>
 })
 .AddJwtBearer(options =>
 {
-    var key = Encoding.ASCII.GetBytes(builder.Configuration["JwtSettings:Secret"]);
+    var key = Encoding.ASCII.GetBytes(builder.Configuration["JwtSettings:Secret"]!);
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = true,
@@ -73,6 +80,28 @@ builder.Services.AddAuthentication(options =>
         ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
         ValidAudience = builder.Configuration["JwtSettings:Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(key),
+    };
+
+    // Comprueba si el token ha sido revocado (líneas añadidas)
+    options.Events = new JwtBearerEvents
+    {
+        OnTokenValidated = context =>
+        {
+            try
+            {
+                var revocationService = context.HttpContext.RequestServices.GetService(typeof(ITokenRevocationService)) as ITokenRevocationService;
+                var jti = context.Principal?.FindFirst(JwtRegisteredClaimNames.Jti)?.Value;
+                if (revocationService != null && (string.IsNullOrEmpty(jti) || revocationService.IsTokenRevoked(jti)))
+                {
+                    context.Fail("Token revoked");
+                }
+            }
+            catch
+            {
+                context.Fail("Token validation error");
+            }
+            return Task.CompletedTask;
+        }
     };
 });
 
@@ -122,6 +151,9 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseCors("CorsPolicy");
+
+// Habilita autenticación antes de autorización (línea añadida)
+app.UseAuthentication();
 
 app.UseAuthorization();
 
