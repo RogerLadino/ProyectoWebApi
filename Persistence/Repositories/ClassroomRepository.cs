@@ -38,5 +38,25 @@ namespace Persistence.Repositories
                 .AnyAsync(c => c.AppUsers.Any(u => u.Id == userIdInt));
         }
 
+        // Nuevos métodos para incluir usuarios con roles
+        public async Task<Classroom?> GetByIdWithUsersAndRolesAsync(int classroomId)
+        {
+            return await _context.Classrooms
+                .Include(c => c.AppUsers)
+                    .ThenInclude(u => u.AppRole)
+                .FirstOrDefaultAsync(c => c.Id == classroomId);
+        }
+
+        public async Task<IEnumerable<Classroom>> GetByUserIdWithUsersAndRolesAsync(string userId)
+        {
+            if (!int.TryParse(userId, out int userIdInt))
+                return Enumerable.Empty<Classroom>();
+
+            return await _context.Classrooms
+                .Include(c => c.AppUsers)
+                    .ThenInclude(u => u.AppRole)
+                .Where(c => c.AppUsers.Any(u => u.Id == userIdInt))
+                .ToListAsync();
+        }
     }
 }
