@@ -124,12 +124,30 @@ public class ClassroomService : IClassroomService
         _repositoryManager.ClassroomRepository.Remove(classroom);
         await _repositoryManager.SaveChangesAsync();
     }
+    
     public async Task<ClassroomDto> GetByCodeAsync(string code) 
     {
         var classroom = await _repositoryManager.ClassroomRepository.GetByCodeAsync(code);
         if (classroom is null)
             throw new ClassroomNotFoundException("No classroom exists with the given code");
         return classroom.Adapt<ClassroomDto>();
+    }
+
+    // NUEVOS MÉTODOS CON INFORMACIÓN DEL PROFESOR
+    public async Task<ClassroomWithTeacherDto> GetByIdWithTeacherAsync(int classroomId)
+    {
+        var classroom = await _repositoryManager.ClassroomRepository.GetByIdWithUsersAndRolesAsync(classroomId);
+        if (classroom is null)
+            throw new ClassroomNotFoundException("No classroom exists with the given ID");
+
+        return MapToClassroomWithTeacher(classroom);
+    }
+
+    public async Task<IEnumerable<ClassroomWithTeacherDto>> GetByUserIdWithTeacherAsync(string userId)
+    {
+        var classrooms = await _repositoryManager.ClassroomRepository.GetByUserIdWithUsersAndRolesAsync(userId);
+        
+        return classrooms.Select(MapToClassroomWithTeacher);
     }
 
     // MÉTODOS PRIVADOS
@@ -154,5 +172,26 @@ public class ClassroomService : IClassroomService
         var random = new Random();
         return new string(Enumerable.Repeat(chars, length)
             .Select(s => s[random.Next(s.Length)]).ToArray());
+    }
+
+    private ClassroomWithTeacherDto MapToClassroomWithTeacher(Classroom classroom)
+    {
+        // Buscar el profesor (primer usuario con rol "profesor" o AppRoleId == 1)
+        var teacher = classroom.AppUsers
+            .FirstOrDefault(u => u.AppRole?.Description?.ToLower() == "profesor" || u.AppRoleId == 1);
+
+        return new ClassroomWithTeacherDto
+        {
+            Id = classroom.Id,
+            Name = classroom.Name,
+            Code = classroom.Code,
+            Teacher = teacher != null ? new TeacherInfoDto
+            {
+                UserId = teacher.Id,
+                FirstName = teacher.FirstName,
+                LastName = teacher.LastName,
+                Email = teacher.Email
+            } : null
+        };
     }
 }
