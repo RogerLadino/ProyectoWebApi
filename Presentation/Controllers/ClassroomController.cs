@@ -23,7 +23,8 @@ public class ClassroomController : ControllerBase
         if (string.IsNullOrEmpty(userId))
             return Unauthorized("No se pudo obtener el usuario logueado.");
 
-        var classrooms = await _serviceManager.ClassroomService.GetByUserIdAsync(userId);
+        // Usar el nuevo método que incluye información del profesor
+        var classrooms = await _serviceManager.ClassroomService.GetByUserIdWithTeacherAsync(userId);
         return Ok(classrooms);
     }
 
@@ -54,7 +55,8 @@ public class ClassroomController : ControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult> GetById(int id)
     {
-        var classroom = await _serviceManager.ClassroomService.GetByIdAsync(id);
+        // Usar el nuevo método que incluye información del profesor
+        var classroom = await _serviceManager.ClassroomService.GetByIdWithTeacherAsync(id);
         return Ok(classroom);
     }
 
