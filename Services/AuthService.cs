@@ -27,9 +27,9 @@ namespace Core.Services
             _configuration = configuration;
         }
 
-        public async Task<AppUserDto> Profile(int appUserId)
+        public async Task<AppUserDto> Profile(int UserId)
         {
-            var appUser = await _repositoryManager.UsuarioRepository.GetByIdAsync(appUserId);
+            var appUser = await _repositoryManager.UsuarioRepository.GetByIdAsync(UserId);
 
             if (appUser is null)
                 throw new KeyNotFoundException("No user exists with given ID");
