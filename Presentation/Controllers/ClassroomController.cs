@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Service.Abstractions;
 using Shared.DTOs.Classroom;
 using System.Security.Claims;
-
+namespace Infrastructure.Presentation.Controllers;
 [ApiController]
 [Route("api/classroom")]
 public class ClassroomController : ControllerBase
