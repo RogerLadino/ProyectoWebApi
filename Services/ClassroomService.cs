@@ -75,9 +75,9 @@ public class ClassroomService : IClassroomService
         return classrooms.Adapt<IEnumerable<ClassroomDto>>();
     }
 
-    public async Task<ClassroomDto> GetByIdAsync(int classroomId)
+    public async Task<ClassroomDto> GetByIdAsync(int Id)
     {
-        var classroom = await _repositoryManager.ClassroomRepository.GetByIdAsync(classroomId);
+        var classroom = await _repositoryManager.ClassroomRepository.GetByIdAsync(Id);
         if (classroom is null)
             throw new ClassroomNotFoundException("No classroom exists with the given ID");
 
@@ -97,13 +97,13 @@ public class ClassroomService : IClassroomService
         return classroom.Adapt<ClassroomDto>();
     }
 
-    public async Task UpdateAsync(int classroomId, ClassroomUpdateDto classroomForUpdateDto)
+    public async Task UpdateAsync(int classroomId, ClassroomUpdateDto classroomUpdateDto)
     {
         var classroom = await _repositoryManager.ClassroomRepository.GetByIdAsync(classroomId);
         if (classroom is null)
             throw new ClassroomNotFoundException("No classroom exists with the given ID");
 
-        classroom.Name = classroomForUpdateDto.Name;
+        classroom.Name = classroomUpdateDto.Name;
 
         var classroomExists = await _repositoryManager.ClassroomRepository
             .AnyAsync(e => e.Name.Equals(classroom.Name) && e.Id != classroomId);
@@ -114,9 +114,9 @@ public class ClassroomService : IClassroomService
         await _repositoryManager.SaveChangesAsync();
     }
 
-    public async Task DeleteAsync(int classroomId)
+    public async Task DeleteAsync(int Id)
     {
-        var classroom = await _repositoryManager.ClassroomRepository.GetByIdWithUsersAsync(classroomId);
+        var classroom = await _repositoryManager.ClassroomRepository.GetByIdWithUsersAsync(Id);
         if (classroom is null)
             throw new ClassroomNotFoundException("No classroom exists with the given ID");
         // limpiar relaciones many-to-many
@@ -134,9 +134,9 @@ public class ClassroomService : IClassroomService
     }
 
     // NUEVOS MÉTODOS CON INFORMACIÓN DEL PROFESOR
-    public async Task<ClassroomWithTeacherDto> GetByIdWithTeacherAsync(int classroomId)
+    public async Task<ClassroomWithTeacherDto> GetByIdWithTeacherAsync(int Id)
     {
-        var classroom = await _repositoryManager.ClassroomRepository.GetByIdWithUsersAndRolesAsync(classroomId);
+        var classroom = await _repositoryManager.ClassroomRepository.GetByIdWithUsersAndRolesAsync(Id);
         if (classroom is null)
             throw new ClassroomNotFoundException("No classroom exists with the given ID");
 
