@@ -14,6 +14,7 @@ public sealed class ServiceManager : IServiceManager
     private readonly Lazy<ICodeService> _lazyCodeService;
     private readonly Lazy<IEmailService> _lazyEmailService;
     private readonly Lazy<IAuthService> _lazyAuthService;
+    private readonly Lazy<ITokenBlacklistService> _lazyTokenBlacklistService;
 
     public ServiceManager(IRepositoryManager repositoryManager, IRealtimeManager realtimeManager, IConfiguration configuration)
     {
@@ -23,17 +24,14 @@ public sealed class ServiceManager : IServiceManager
         _lazyAuthService = new Lazy<IAuthService>(() => new AuthService(repositoryManager, _lazyEmailService.Value, configuration));
         _lazySubmissionService = new Lazy<ISubmissionService>(() => new SubmissionService(repositoryManager));
         _lazyCodeService = new Lazy<ICodeService>(() => new CodeService(repositoryManager, realtimeManager));
+        _lazyTokenBlacklistService = new Lazy<ITokenBlacklistService>(() => new TokenBlacklistService());
     }
 
     public IEmailService EmailService => _lazyEmailService.Value;
-
     public IAuthService AuthService => _lazyAuthService.Value;
-
     public IExerciseService ExerciseService => _lazyExerciseService.Value;
-
     public ISubmissionService SubmissionService => _lazySubmissionService.Value;
-
     public ICodeService CodeService => _lazyCodeService.Value;
-
     public IClassroomService ClassroomService => _lazyClassroomService.Value;
+    public ITokenBlacklistService TokenBlacklistService => _lazyTokenBlacklistService.Value;
 }
