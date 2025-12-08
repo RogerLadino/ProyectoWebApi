@@ -31,7 +31,7 @@ public partial class RepositoryDbContext : DbContext
     public virtual DbSet<TestCase> TestCases { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {}
+    { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
