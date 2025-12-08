@@ -10,4 +10,5 @@ public interface IServiceManager
     IEmailService EmailService { get; }
     ISubmissionService SubmissionService { get; }
     ICodeService CodeService { get; }
+    ITokenBlacklistService TokenBlacklistService { get; }
 }
