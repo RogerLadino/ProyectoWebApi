@@ -1,4 +1,4 @@
-using Domain.Realtime;
+ï»¿using Domain.Realtime;
 using Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
 using OrdenesCompra.Extensions;
@@ -15,25 +15,27 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
-using System.IdentityModel.Tokens.Jwt;
-using System.Threading.Tasks;
+using Presentation; 
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Service extensions
-
 builder.Services.ConfigureCors();
 builder.Services.ConfigureLoggerService();
 
 // Add services to the container.
-
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddControllers()
-    .AddApplicationPart(typeof(Presentation.AssemblyReference).Assembly);
+builder.Services.AddControllers(options =>
+{
+    // ðŸ‘‡ Registro global del filtro de revocaciÃ³n
+    options.Filters.Add<TokenRevocationFilter>();
+})
+.AddApplicationPart(typeof(Presentation.AssemblyReference).Assembly);
 
-builder.Host.UseSerilog((hostContext, configuration) => {
+builder.Host.UseSerilog((hostContext, configuration) =>
+{
     configuration.ReadFrom.Configuration(hostContext.Configuration);
 });
 
@@ -45,17 +47,11 @@ builder.Services.AddScoped<IRepositoryManager, RepositoryManager>();
 builder.Services.AddScoped<IClassroomService, ClassroomService>();
 builder.Services.AddScoped<IClassroomRepository, ClassroomRepository>();
 
-// Registra el servicio de revocación y cache en memoria (líneas añadidas)
-builder.Services.AddMemoryCache();
-builder.Services.AddSingleton<ITokenRevocationService, TokenRevocationService>();
-
 // Realtime
-
 builder.Services.AddSignalR();
 builder.Services.AddScoped<IRealtimeManager, RealtimeManager>();
 
 // Middlewares
-
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 
@@ -70,7 +66,7 @@ builder.Services.AddAuthentication(options =>
 })
 .AddJwtBearer(options =>
 {
-    var key = Encoding.ASCII.GetBytes(builder.Configuration["JwtSettings:Secret"]!);
+    var key = Encoding.ASCII.GetBytes(builder.Configuration["JwtSettings:Secret"]);
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = true,
@@ -81,36 +77,13 @@ builder.Services.AddAuthentication(options =>
         ValidAudience = builder.Configuration["JwtSettings:Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(key),
     };
-
-    // Comprueba si el token ha sido revocado (líneas añadidas)
-    options.Events = new JwtBearerEvents
-    {
-        OnTokenValidated = context =>
-        {
-            try
-            {
-                var revocationService = context.HttpContext.RequestServices.GetService(typeof(ITokenRevocationService)) as ITokenRevocationService;
-                var jti = context.Principal?.FindFirst(JwtRegisteredClaimNames.Jti)?.Value;
-                if (revocationService != null && (string.IsNullOrEmpty(jti) || revocationService.IsTokenRevoked(jti)))
-                {
-                    context.Fail("Token revoked");
-                }
-            }
-            catch
-            {
-                context.Fail("Token validation error");
-            }
-            return Task.CompletedTask;
-        }
-    };
 });
 
-
+// Swagger con seguridad JWT
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Proyecto API", Version = "v1" });
 
-    // Configuración de seguridad para JWT
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Name = "Authorization",
@@ -137,6 +110,9 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
+// ðŸ‘‡ Registro del servicio de lista negra
+builder.Services.AddSingleton<ITokenBlacklistService, TokenBlacklistService>();
+
 var app = builder.Build();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -152,13 +128,10 @@ app.UseHttpsRedirection();
 
 app.UseCors("CorsPolicy");
 
-// Habilita autenticación antes de autorización (línea añadida)
-app.UseAuthentication();
-
+app.UseAuthentication(); // ðŸ‘ˆ Importante: primero autenticaciÃ³n
 app.UseAuthorization();
 
 app.MapControllers();
-
 app.MapHub<CodeHub>("/hubs/code");
 
 app.Run();
