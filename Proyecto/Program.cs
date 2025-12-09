@@ -1,6 +1,13 @@
+using Core.Services;
+using Core.Services.Abstractions;
 using Domain.Realtime;
 using Domain.Repositories;
+using Infrastructure.Exceptions;
+using Infrastructure.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using OrdenesCompra.Extensions;
 using Persistence;
 using Persistence.Repositories;
@@ -9,28 +16,23 @@ using Realtime.Services;
 using Serilog;
 using Service.Abstractions;
 using Services;
-using Core.Services;
-using Core.Services.Abstractions;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using Microsoft.OpenApi.Models;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Service extensions
-
 builder.Services.ConfigureCors();
 builder.Services.ConfigureLoggerService();
 
 // Add services to the container.
-
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddControllers()
     .AddApplicationPart(typeof(Presentation.AssemblyReference).Assembly);
 
-builder.Host.UseSerilog((hostContext, configuration) => {
+builder.Host.UseSerilog((hostContext, configuration) =>
+{
     configuration.ReadFrom.Configuration(hostContext.Configuration);
 });
 
@@ -43,12 +45,10 @@ builder.Services.AddScoped<IClassroomService, ClassroomService>();
 builder.Services.AddScoped<IClassroomRepository, ClassroomRepository>();
 
 // Realtime
-
 builder.Services.AddSignalR();
 builder.Services.AddScoped<IRealtimeManager, RealtimeManager>();
 
 // Middlewares
-
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 
@@ -75,7 +75,6 @@ builder.Services.AddAuthentication(options =>
         IssuerSigningKey = new SymmetricSecurityKey(key),
     };
 });
-
 
 builder.Services.AddSwaggerGen(c =>
 {
@@ -110,8 +109,6 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -123,10 +120,12 @@ app.UseHttpsRedirection();
 
 app.UseCors("CorsPolicy");
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
 
 app.MapHub<CodeHub>("/hubs/code");
 
-app.Run();
+// S6966: usar await RunAsync en top-level statements
+await app.RunAsync();
