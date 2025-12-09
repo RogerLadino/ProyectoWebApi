@@ -11,9 +11,9 @@ namespace Core.Services.Abstractions
     public interface IAuthService
     {
         Task<AppUserDto> Profile(int userId);
-        Task<string?> LoginAsync(LoginDTO loginDto);
-        Task<bool> RegistroAsync(RegistroDTO registroDto);
-        Task<bool> ForgotPasswordAsync(ForgotPasswordDTO forgotPasswordDto);
-        Task<bool> ResetPasswordAsync(ResetPasswordDTO resetPasswordDto);
+        Task<string?> LoginAsync(LoginDto loginDto);
+        Task<bool> RegistroAsync(RegistroDto registroDto);
+        Task<bool> ForgotPasswordAsync(ForgotPasswordDto forgotPasswordDto);
+        Task<bool> ResetPasswordAsync(ResetPasswordDto resetPasswordDto);
     }
 }
