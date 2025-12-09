@@ -11,7 +11,6 @@ using Core.Exceptions;
 using System.Text;
 using Mapster;
 
-
 namespace Core.Services
 {
     public class AuthService : IAuthService
@@ -27,9 +26,9 @@ namespace Core.Services
             _configuration = configuration;
         }
 
-        public async Task<AppUserDto> Profile(int UserId)
+        public async Task<AppUserDto> Profile(int userId)
         {
-            var appUser = await _repositoryManager.UsuarioRepository.GetByIdAsync(UserId);
+            var appUser = await _repositoryManager.UsuarioRepository.GetByIdAsync(userId);
 
             if (appUser is null)
                 throw new KeyNotFoundException("No user exists with given ID");
@@ -37,7 +36,7 @@ namespace Core.Services
             return appUser.Adapt<AppUserDto>();
         }
 
-        public async Task<string?> LoginAsync(LoginDTO loginDto)
+        public async Task<string?> LoginAsync(LoginDto loginDto)
         {
             var usuario = await _repositoryManager.UsuarioRepository.GetByEmailAsync(loginDto.CorreoElectronico);
             if (usuario == null || !BCrypt.Net.BCrypt.Verify(loginDto.Clave, usuario.Password))
@@ -48,7 +47,7 @@ namespace Core.Services
             return GenerateJwtToken(usuario);
         }
 
-        public async Task<bool> RegistroAsync(RegistroDTO registroDto)
+        public async Task<bool> RegistroAsync(RegistroDto registroDto)
         {
             var usuarioExistente = await _repositoryManager.UsuarioRepository.GetByEmailAsync(registroDto.CorreoElectronico);
             if (usuarioExistente != null)
@@ -63,7 +62,7 @@ namespace Core.Services
                 FirstName = registroDto.PrimerNombre,
                 MiddleName = registroDto.SegundoNombre,
                 LastName = registroDto.PrimerApellido,
-                SecondLastName = registroDto.SegundoApellido, 
+                SecondLastName = registroDto.SegundoApellido,
                 Password = claveHash,
                 AppRoleId = registroDto.RolId
             };
@@ -72,7 +71,7 @@ namespace Core.Services
             return true;
         }
 
-        public async Task<bool> ForgotPasswordAsync(ForgotPasswordDTO forgotPasswordDto)
+        public async Task<bool> ForgotPasswordAsync(ForgotPasswordDto forgotPasswordDto)
         {
             var usuario = await _repositoryManager.UsuarioRepository.GetByEmailAsync(forgotPasswordDto.CorreoElectronico);
             if (usuario == null)
@@ -92,7 +91,7 @@ namespace Core.Services
             return true;
         }
 
-        public async Task<bool> ResetPasswordAsync(ResetPasswordDTO resetPasswordDto)
+        public async Task<bool> ResetPasswordAsync(ResetPasswordDto resetPasswordDto)
         {
             var usuario = await _repositoryManager.UsuarioRepository.GetByResetTokenAsync(resetPasswordDto.Token);
             if (usuario == null || usuario.FechaExpiracionToken < DateTime.UtcNow)
