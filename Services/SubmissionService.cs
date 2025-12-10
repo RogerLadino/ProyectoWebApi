@@ -20,13 +20,16 @@ public class SubmissionService : ISubmissionService
 
     public async Task<IEnumerable<SubmissionDto>> GetAllAsync(int exerciseId)
     {
-        var exercise = await _repositoryManager.ExerciseRepository.GetByIdAsync(exerciseId);
+        var exercise = await _repositoryManager.ExerciseRepository
+            .GetByIdAsync(exerciseId) 
+            ?? throw new Exception("No existe un ejercicio con este ID.");
 
         var submissions = await _repositoryManager.SubmissionRepository
             .FindByConditionAsync(s => s.ExerciseId == exerciseId);
 
         var classroom = await _repositoryManager.ClassroomRepository
-            .GetByIdWithUsersAsync(exercise.ClassroomId);
+            .GetByIdWithUsersAsync(exercise.ClassroomId) 
+            ?? throw new Exception("No existe una clase con este ID.");
 
         var submissionDict = submissions
             .ToDictionary(s => s.AppUserId, s => s.Adapt<SubmissionDto>());
