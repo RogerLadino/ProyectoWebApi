@@ -54,9 +54,9 @@ public class ExerciseService : IExerciseService
         return exercise.Adapt<ExerciseDto>();
     }
 
-    public async Task UpdateAsync(int exerciseId, ExerciseDto exerciseUpdateDto)
+    public async Task UpdateAsync(int id, ExerciseDto exerciseUpdateDto)
     {
-        var exercise = await _repositoryManager.ExerciseRepository.GetByIdAsync(exerciseId);
+        var exercise = await _repositoryManager.ExerciseRepository.GetByIdAsync(id);
 
         if (exercise is null)
             throw new ExerciseNotFoundException("No exercise exists with the given ID");
@@ -64,7 +64,7 @@ public class ExerciseService : IExerciseService
         exerciseUpdateDto.Adapt(exercise);
 
         var exerciseExists = await _repositoryManager.ExerciseRepository
-            .AnyAsync(e => e.Name.Equals(exercise.Name) && e.Id != exerciseId);
+            .AnyAsync(e => e.Name.Equals(exercise.Name) && e.Id != id);
 
         if (exerciseExists)
             throw new ExerciseAlreadyExistsException("An exercise with the same name already exists");
