@@ -29,7 +29,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddControllers()
-    .AddApplicationPart(typeof(Presentation.AssemblyReference).Assembly);
+    .AddApplicationPart(typeof(Presentation.IAssemblyReference).Assembly);
 
 builder.Host.UseSerilog((hostContext, configuration) =>
 {
@@ -66,7 +66,7 @@ builder.Services.AddAuthentication(options =>
     var secret = builder.Configuration["JwtSettings:Secret"];
     if (string.IsNullOrEmpty(secret))
     {
-        throw new Exception("La clave JwtSettings:Secret no está configurada.");
+        throw new InvalidOperationException("La clave JwtSettings:Secret no está configurada.");
     }
     var key = Encoding.ASCII.GetBytes(secret);
 
