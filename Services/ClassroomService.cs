@@ -4,6 +4,8 @@ using Domain.Repositories;
 using Mapster;
 using Service.Abstractions;
 using Shared.DTOs.Classroom;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace Services;
 
@@ -155,9 +157,20 @@ public class ClassroomService : IClassroomService
     private static string GenerateRandomCode(int length)
     {
         const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-        var random = new Random();
-        return new string(Enumerable.Repeat(chars, length)
-            .Select(s => s[random.Next(s.Length)]).ToArray());
+
+        using var rng = RandomNumberGenerator.Create();
+
+        byte[] data = new byte[length];
+        rng.GetBytes(data);
+
+        var result = new StringBuilder(length);
+
+        foreach (byte b in data)
+        {
+            result.Append(chars[b % chars.Length]);
+        }
+
+        return result.ToString();
     }
 
     private ClassroomWithTeacherDto MapToClassroomWithTeacher(Classroom classroom)
