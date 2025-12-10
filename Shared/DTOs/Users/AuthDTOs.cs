@@ -35,30 +35,30 @@ namespace Shared.DTOs.Users
     {
         [Required(ErrorMessage = "El correo electrónico es obligatorio.")]
         [EmailAddress(ErrorMessage = "El formato del correo electrónico no es válido.")]
-        public string CorreoElectronico { get; set; }
+        public required string CorreoElectronico { get; set; }
 
         [Required(ErrorMessage = "La clave es obligatoria.")]
-        public string Clave { get; set; }
+        public required string Clave { get; set; }
     }
 
     public class LoginResponseDto
     {
-        public string Token { get; set; }
+        public required string Token { get; set; }
     }
 
     public class ForgotPasswordDto
     {
         [Required(ErrorMessage = "El correo electrónico es obligatorio.")]
         [EmailAddress(ErrorMessage = "El formato del correo electrónico no es válido.")]
-        public string CorreoElectronico { get; set; }
+        public required string CorreoElectronico { get; set; }
     }
 
     public class ResetPasswordDto
     {
         [Required(ErrorMessage = "El token es obligatorio.")]
-        public string Token { get; set; }
+        public required string Token { get; set; }
 
         [Required(ErrorMessage = "La nueva clave es obligatoria.")]
-        public string NuevaClave { get; set; }
+        public required string NuevaClave { get; set; }
     }
 }
