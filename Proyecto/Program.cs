@@ -63,7 +63,13 @@ builder.Services.AddAuthentication(options =>
 })
 .AddJwtBearer(options =>
 {
-    var key = Encoding.ASCII.GetBytes(builder.Configuration["JwtSettings:Secret"]);
+    var secret = builder.Configuration["JwtSettings:Secret"];
+    if (string.IsNullOrEmpty(secret))
+    {
+        throw new Exception("La clave JwtSettings:Secret no está configurada.");
+    }
+    var key = Encoding.ASCII.GetBytes(secret);
+
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = true,
