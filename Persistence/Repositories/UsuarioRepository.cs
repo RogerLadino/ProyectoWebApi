@@ -31,9 +31,9 @@ namespace Persistence.Repositories
                 .FirstOrDefaultAsync(u => u.TokenResetPassword == token);
         }
 
-        public async Task AddAsync(AppUser usuario)
+        public async Task AddAsync(AppUser nuevoUsuario)
         {
-            _context.AppUsers.Add(usuario);
+            _context.AppUsers.Add(nuevoUsuario);
             await _context.SaveChangesAsync();
         }
 

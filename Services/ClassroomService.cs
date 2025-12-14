@@ -4,12 +4,15 @@ using Domain.Repositories;
 using Mapster;
 using Service.Abstractions;
 using Shared.DTOs.Classroom;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace Services;
 
 public class ClassroomService : IClassroomService
 {
     private readonly IRepositoryManager _repositoryManager;
+    private const string ClassroomNotFoundMessage = "No classroom exists with the given ID";
 
     public ClassroomService(IRepositoryManager repositoryManager)
     {
@@ -18,24 +21,17 @@ public class ClassroomService : IClassroomService
 
     public async Task<IEnumerable<ClassroomDto>> GetByUserIdAsync(string userId)
     {
-        // Obtener el usuario con sus aulas
         var user = await _repositoryManager.UsuarioRepository.GetByIdWithClassroomsAsync(userId);
         if (user == null)
             return Enumerable.Empty<ClassroomDto>();
 
-        // Mapear las aulas del usuario a ClassroomDto
         return user.Classrooms.Adapt<IEnumerable<ClassroomDto>>();
     }
 
     public async Task<ClassroomDto> CreateAndAssignProfessorAsync(ClassroomCreationDto classroomForCreationDto, string userId)
     {
-        // Crear el aula
         var classroomDto = await CreateAsync(classroomForCreationDto);
-
-        // Obtener el aula recién creada con la relación
         var classroom = await _repositoryManager.ClassroomRepository.GetByIdWithUsersAsync(classroomDto.Id);
-
-        // Obtener el usuario usando UsuarioRepository
         var user = await _repositoryManager.UsuarioRepository.GetByIdAsync(userId);
 
         if (classroom != null && user != null)
@@ -49,22 +45,18 @@ public class ClassroomService : IClassroomService
 
     public async Task JoinClassroomByCodeAsync(string code, string userId)
     {
-        // Buscar aula por código
         var classroom = await _repositoryManager.ClassroomRepository.GetByCodeAsync(code);
         if (classroom == null)
             throw new ClassroomNotFoundException("No se encontró un aula con ese código");
 
-        // Obtener el usuario usando UsuarioRepository
         var user = await _repositoryManager.UsuarioRepository.GetByIdAsync(userId);
         if (user == null)
             throw new InvalidOperationException("Usuario no encontrado");
 
-        // Verificar si ya está unido
         var isAlreadyMember = await _repositoryManager.ClassroomRepository.IsUserInClassroomAsync(userId, classroom.Id);
         if (isAlreadyMember)
             throw new InvalidOperationException("Ya estás unido a este aula");
 
-        // Agregar usuario al aula
         classroom.AppUsers.Add(user);
         await _repositoryManager.SaveChangesAsync();
     }
@@ -75,11 +67,11 @@ public class ClassroomService : IClassroomService
         return classrooms.Adapt<IEnumerable<ClassroomDto>>();
     }
 
-    public async Task<ClassroomDto> GetByIdAsync(int classroomId)
+    public async Task<ClassroomDto> GetByIdAsync(int id)
     {
-        var classroom = await _repositoryManager.ClassroomRepository.GetByIdAsync(classroomId);
+        var classroom = await _repositoryManager.ClassroomRepository.GetByIdAsync(id);
         if (classroom is null)
-            throw new ClassroomNotFoundException("No classroom exists with the given ID");
+            throw new ClassroomNotFoundException(ClassroomNotFoundMessage);
 
         return classroom.Adapt<ClassroomDto>();
     }
@@ -87,8 +79,6 @@ public class ClassroomService : IClassroomService
     public async Task<ClassroomDto> CreateAsync(ClassroomCreationDto classroomForCreationDto)
     {
         var classroom = classroomForCreationDto.Adapt<Classroom>();
-
-        // Generar automáticamente un código único
         classroom.Code = await GenerateUniqueCodeAsync();
 
         _repositoryManager.ClassroomRepository.Add(classroom);
@@ -97,13 +87,13 @@ public class ClassroomService : IClassroomService
         return classroom.Adapt<ClassroomDto>();
     }
 
-    public async Task UpdateAsync(int classroomId, ClassroomUpdateDto classroomForUpdateDto)
+    public async Task UpdateAsync(int classroomId, ClassroomUpdateDto classroomUpdateDto)
     {
         var classroom = await _repositoryManager.ClassroomRepository.GetByIdAsync(classroomId);
         if (classroom is null)
-            throw new ClassroomNotFoundException("No classroom exists with the given ID");
+            throw new ClassroomNotFoundException(ClassroomNotFoundMessage);
 
-        classroom.Name = classroomForUpdateDto.Name;
+        classroom.Name = classroomUpdateDto.Name;
 
         var classroomExists = await _repositoryManager.ClassroomRepository
             .AnyAsync(e => e.Name.Equals(classroom.Name) && e.Id != classroomId);
@@ -114,25 +104,41 @@ public class ClassroomService : IClassroomService
         await _repositoryManager.SaveChangesAsync();
     }
 
-    public async Task DeleteAsync(int classroomId)
+    public async Task DeleteAsync(int id)
     {
-        var classroom = await _repositoryManager.ClassroomRepository.GetByIdWithUsersAsync(classroomId);
+        var classroom = await _repositoryManager.ClassroomRepository.GetByIdWithUsersAsync(id);
         if (classroom is null)
-            throw new ClassroomNotFoundException("No classroom exists with the given ID");
-        // limpiar relaciones many-to-many
+            throw new ClassroomNotFoundException(ClassroomNotFoundMessage);
+
         classroom.AppUsers.Clear();
         _repositoryManager.ClassroomRepository.Remove(classroom);
         await _repositoryManager.SaveChangesAsync();
     }
-    public async Task<ClassroomDto> GetByCodeAsync(string code) 
+
+    public async Task<ClassroomDto> GetByCodeAsync(string code)
     {
         var classroom = await _repositoryManager.ClassroomRepository.GetByCodeAsync(code);
         if (classroom is null)
             throw new ClassroomNotFoundException("No classroom exists with the given code");
+
         return classroom.Adapt<ClassroomDto>();
     }
 
-    // MÉTODOS PRIVADOS
+    public async Task<ClassroomWithTeacherDto> GetByIdWithTeacherAsync(int id)
+    {
+        var classroom = await _repositoryManager.ClassroomRepository.GetByIdWithUsersAndRolesAsync(id);
+        if (classroom is null)
+            throw new ClassroomNotFoundException(ClassroomNotFoundMessage);
+
+        return MapToClassroomWithTeacher(classroom);
+    }
+
+    public async Task<IEnumerable<ClassroomWithTeacherDto>> GetByUserIdWithTeacherAsync(string userId)
+    {
+        var classrooms = await _repositoryManager.ClassroomRepository.GetByUserIdWithUsersAndRolesAsync(userId);
+        return classrooms.Select(MapToClassroomWithTeacher);
+    }
+
     private async Task<string> GenerateUniqueCodeAsync()
     {
         string code;
@@ -148,11 +154,42 @@ public class ClassroomService : IClassroomService
         return code;
     }
 
-    private string GenerateRandomCode(int length)
+    private static string GenerateRandomCode(int length)
     {
         const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-        var random = new Random();
-        return new string(Enumerable.Repeat(chars, length)
-            .Select(s => s[random.Next(s.Length)]).ToArray());
+
+        using var rng = RandomNumberGenerator.Create();
+
+        byte[] data = new byte[length];
+        rng.GetBytes(data);
+
+        var result = new StringBuilder(length);
+
+        foreach (byte b in data)
+        {
+            result.Append(chars[b % chars.Length]);
+        }
+
+        return result.ToString();
+    }
+
+    private ClassroomWithTeacherDto MapToClassroomWithTeacher(Classroom classroom)
+    {
+        var teacher = classroom.AppUsers
+            .FirstOrDefault(u => u.AppRole?.Description?.ToLower() == "profesor" || u.AppRoleId == 1);
+
+        return new ClassroomWithTeacherDto
+        {
+            Id = classroom.Id,
+            Name = classroom.Name,
+            Code = classroom.Code,
+            Teacher = teacher != null ? new TeacherInfoDto
+            {
+                UserId = teacher.Id,
+                FirstName = teacher.FirstName,
+                LastName = teacher.LastName,
+                Email = teacher.Email
+            } : null
+        };
     }
 }

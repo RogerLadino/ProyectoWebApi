@@ -6,13 +6,11 @@ namespace Persistence.Repositories;
 
 public abstract class RepositoryBase<TEntity> : IRepositoryBase<TEntity> where TEntity : class
 {
-    private readonly RepositoryDbContext _repositoryDbContext;
     protected readonly DbSet<TEntity> _dbSet;
 
-    public RepositoryBase(RepositoryDbContext repositoryDbContext)
+    protected RepositoryBase(RepositoryDbContext repositoryDbContext)
     {
-        _repositoryDbContext = repositoryDbContext;
-        _dbSet = _repositoryDbContext.Set<TEntity>();
+        _dbSet = repositoryDbContext.Set<TEntity>();
     }
 
     public async Task<IEnumerable<TEntity>> GetAllAsync()

@@ -36,7 +36,6 @@ public partial class RepositoryDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(RepositoryDbContext).Assembly);
-        OnModelCreatingPartial(modelBuilder);
 
         modelBuilder.Entity<AppRole>().HasData(
                 new AppRole { Id = 1, Description = "profesor" },
@@ -47,6 +46,4 @@ public partial class RepositoryDbContext : DbContext
             .HasIndex(u => u.Email)
             .IsUnique();
     }
-
-    partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
 }

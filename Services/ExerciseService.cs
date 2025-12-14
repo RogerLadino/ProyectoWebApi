@@ -37,10 +37,10 @@ public class ExerciseService : IExerciseService
         return exercise.Adapt<ExerciseDto>();
     }
 
-    public async Task<ExerciseDto> CreateAsync(int classroomId, ExerciseCreationDto exerciseForCreationDto)
+    public async Task<ExerciseDto> CreateAsync(int classroomId, ExerciseCreationDto exerciseCreationDto)
     {
-        exerciseForCreationDto.ClassroomId = classroomId;
-        var exercise = exerciseForCreationDto.Adapt<Exercise>();
+        exerciseCreationDto.ClassroomId = classroomId;
+        var exercise = exerciseCreationDto.Adapt<Exercise>();
 
         var exerciseExists = await _repositoryManager.ExerciseRepository
             .AnyAsync(e => e.Name.Equals(exercise.Name) && e.ClassroomId.Equals(exercise.ClassroomId));
@@ -54,17 +54,17 @@ public class ExerciseService : IExerciseService
         return exercise.Adapt<ExerciseDto>();
     }
 
-    public async Task UpdateAsync(int exerciseId, ExerciseDto exerciseForUpdateDto)
+    public async Task UpdateAsync(int id, ExerciseDto exerciseUpdateDto)
     {
-        var exercise = await _repositoryManager.ExerciseRepository.GetByIdAsync(exerciseId);
+        var exercise = await _repositoryManager.ExerciseRepository.GetByIdAsync(id);
 
         if (exercise is null)
             throw new ExerciseNotFoundException("No exercise exists with the given ID");
 
-        exerciseForUpdateDto.Adapt(exercise);
+        exerciseUpdateDto.Adapt(exercise);
 
         var exerciseExists = await _repositoryManager.ExerciseRepository
-            .AnyAsync(e => e.Name.Equals(exercise.Name) && e.Id != exerciseId);
+            .AnyAsync(e => e.Name.Equals(exercise.Name) && e.Id != id);
 
         if (exerciseExists)
             throw new ExerciseAlreadyExistsException("An exercise with the same name already exists");
@@ -72,9 +72,9 @@ public class ExerciseService : IExerciseService
         await _repositoryManager.SaveChangesAsync();
     }
 
-    public async Task DeleteAsync(int exerciseId)
+    public async Task DeleteAsync(int id)
     {
-        var exercise = await _repositoryManager.ExerciseRepository.GetByIdAsync(exerciseId);
+        var exercise = await _repositoryManager.ExerciseRepository.GetByIdAsync(id);
 
         if (exercise is null)
             throw new ExerciseNotFoundException("No exercise exists with the given ID");

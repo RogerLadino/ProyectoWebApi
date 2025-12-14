@@ -4,47 +4,50 @@ using Service.Abstractions;
 using Shared.DTOs.Submission;
 using System.Security.Claims;
 
-[Authorize]
-[ApiController]
-[Route("api/exercise/{exerciseId:int}/submission")]
-public class SubmissionController : ControllerBase
+namespace Presentation.Controllers
 {
-    private readonly IServiceManager _serviceManager;
-
-    public SubmissionController(IServiceManager serviceManager)
-        => _serviceManager = serviceManager;
-
-    [Authorize(Roles = "Profesor")]
-    [HttpGet]
-    public async Task<IActionResult> GetAllSubmissions([FromRoute] int exerciseId)
+    [Authorize]
+    [ApiController]
+    [Route("api/exercise/{exerciseId:int}/submission")]
+    public class SubmissionController : ControllerBase
     {
-        var submissionDto = await _serviceManager.SubmissionService.GetAllAsync(exerciseId);
-        return Ok(submissionDto);
-    }
+        private readonly IServiceManager _serviceManager;
 
-    [HttpGet("user")]
-    public async Task<IActionResult> GetSubmissionById([FromRoute] int exerciseId)
-    {
-        var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        public SubmissionController(IServiceManager serviceManager)
+            => _serviceManager = serviceManager;
 
-        if (string.IsNullOrEmpty(userIdStr) || !int.TryParse(userIdStr, out var userId))
-            return Unauthorized("UserId not found or invalid");
+        [Authorize(Roles = "Profesor")]
+        [HttpGet]
+        public async Task<IActionResult> GetAllSubmissions([FromRoute] int exerciseId)
+        {
+            var submissionDto = await _serviceManager.SubmissionService.GetAllAsync(exerciseId);
+            return Ok(submissionDto);
+        }
 
-        var submissionDto = await _serviceManager.SubmissionService.GetByIdAsync(userId, exerciseId);
-        return Ok(submissionDto);
-    }
+        [HttpGet("user")]
+        public async Task<IActionResult> GetSubmissionById([FromRoute] int exerciseId)
+        {
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-    [HttpGet("user/{userId:int}")]
-    public async Task<IActionResult> GetUserSubmission([FromRoute] int exerciseId, [FromRoute] int userId)
-    {
-        var submissionDto = await _serviceManager.SubmissionService.GetByIdAsync(userId, exerciseId);
-        return Ok(submissionDto);
-    }
+            if (string.IsNullOrEmpty(userIdStr) || !int.TryParse(userIdStr, out var userId))
+                return Unauthorized("UserId not found or invalid");
 
-    [HttpPut]
-    public async Task<IActionResult> AssignNote([FromRoute] int exerciseId, [FromBody] AssignGradeDto assignGradeDto)
-    {
-        await _serviceManager.SubmissionService.AssignGrade(assignGradeDto.AppUserId, exerciseId, assignGradeDto.Grade);
-        return NoContent();
+            var submissionDto = await _serviceManager.SubmissionService.GetByIdAsync(userId, exerciseId);
+            return Ok(submissionDto);
+        }
+
+        [HttpGet("user/{userId:int}")]
+        public async Task<IActionResult> GetUserSubmission([FromRoute] int exerciseId, [FromRoute] int userId)
+        {
+            var submissionDto = await _serviceManager.SubmissionService.GetByIdAsync(userId, exerciseId);
+            return Ok(submissionDto);
+        }
+
+        [HttpPut]
+        public async Task<IActionResult> AssignNote([FromRoute] int exerciseId, [FromBody] AssignGradeDto assignGradeDto)
+        {
+            await _serviceManager.SubmissionService.AssignGrade(assignGradeDto.AppUserId, exerciseId, assignGradeDto.Grade);
+            return NoContent();
+        }
     }
 }

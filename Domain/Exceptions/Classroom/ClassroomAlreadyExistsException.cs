@@ -1,4 +1,7 @@
-﻿public class ClassroomAlreadyExistsException : Exception
+﻿namespace Domain.Exceptions.Classroom
 {
-    public ClassroomAlreadyExistsException(string message) : base(message) { }
+    public class ClassroomAlreadyExistsException : Exception
+    {
+        public ClassroomAlreadyExistsException(string message) : base(message) { }
+    }
 }

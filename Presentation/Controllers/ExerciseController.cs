@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Service.Abstractions;
 using Shared.DTOs.Exercise;
 using System.Security.Claims;
-
+namespace Infrastructure.Presentation.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/classroom/{classroomId:int}/exercise")]

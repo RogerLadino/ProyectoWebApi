@@ -1,6 +1,13 @@
-﻿using Domain.Realtime;
+﻿using Core.Services;
+using Core.Services.Abstractions;
+using Domain.Realtime;
 using Domain.Repositories;
+using Infrastructure.Exceptions;
+using Infrastructure.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using OrdenesCompra.Extensions;
 using Persistence;
 using Persistence.Repositories;
@@ -9,10 +16,6 @@ using Realtime.Services;
 using Serilog;
 using Service.Abstractions;
 using Services;
-using Core.Services;
-using Core.Services.Abstractions;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
 using Presentation; 
@@ -32,7 +35,7 @@ builder.Services.AddControllers(options =>
     // 👇 Registro global del filtro de revocación
     options.Filters.Add<TokenRevocationFilter>();
 })
-.AddApplicationPart(typeof(Presentation.AssemblyReference).Assembly);
+.AddApplicationPart(typeof(Presentation.IAssemblyReference).Assembly);
 
 builder.Host.UseSerilog((hostContext, configuration) =>
 {
@@ -66,7 +69,13 @@ builder.Services.AddAuthentication(options =>
 })
 .AddJwtBearer(options =>
 {
-    var key = Encoding.ASCII.GetBytes(builder.Configuration["JwtSettings:Secret"]);
+    var secret = builder.Configuration["JwtSettings:Secret"];
+    if (string.IsNullOrEmpty(secret))
+    {
+        throw new InvalidOperationException("La clave JwtSettings:Secret no está configurada.");
+    }
+    var key = Encoding.ASCII.GetBytes(secret);
+
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = true,
@@ -115,8 +124,6 @@ builder.Services.AddSingleton<ITokenBlacklistService, TokenBlacklistService>();
 
 var app = builder.Build();
 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -128,10 +135,11 @@ app.UseHttpsRedirection();
 
 app.UseCors("CorsPolicy");
 
-app.UseAuthentication(); // 👈 Importante: primero autenticación
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
 app.MapHub<CodeHub>("/hubs/code");
 
-app.Run();
+// S6966: usar await RunAsync en top-level statements
+await app.RunAsync();

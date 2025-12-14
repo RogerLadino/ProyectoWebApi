@@ -15,7 +15,7 @@ public class SubmissionRepository : RepositoryBase<Submission>, ISubmissionRepos
             .Include(s => s.AppUser)
             .ToListAsync();
     }
-    public new async Task<Submission?> GetByIdAsync(int exerciseId, int id)
+    public async Task<Submission?> GetByIdAsync(int exerciseId, int id)
     {
         return await _dbSet
             .Include(s => s.AppUser)

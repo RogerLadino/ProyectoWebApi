@@ -8,7 +8,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Shared.DTOs.Users
 {
-    public class RegistroDTO
+    public class RegistroDto
     {
         [Required(ErrorMessage = "El primer nombre es obligatorio.")]
         public required string PrimerNombre { get; set; }
@@ -31,34 +31,34 @@ namespace Shared.DTOs.Users
         public required int RolId { get; set; }
     }
 
-    public class LoginDTO
+    public class LoginDto
     {
         [Required(ErrorMessage = "El correo electrónico es obligatorio.")]
         [EmailAddress(ErrorMessage = "El formato del correo electrónico no es válido.")]
-        public string CorreoElectronico { get; set; }
+        public required string CorreoElectronico { get; set; }
 
         [Required(ErrorMessage = "La clave es obligatoria.")]
-        public string Clave { get; set; }
+        public required string Clave { get; set; }
     }
 
-    public class LoginResponseDTO
+    public class LoginResponseDto
     {
-        public string Token { get; set; }
+        public required string Token { get; set; }
     }
 
-    public class ForgotPasswordDTO
+    public class ForgotPasswordDto
     {
         [Required(ErrorMessage = "El correo electrónico es obligatorio.")]
         [EmailAddress(ErrorMessage = "El formato del correo electrónico no es válido.")]
-        public string CorreoElectronico { get; set; }
+        public required string CorreoElectronico { get; set; }
     }
 
-    public class ResetPasswordDTO
+    public class ResetPasswordDto
     {
         [Required(ErrorMessage = "El token es obligatorio.")]
-        public string Token { get; set; }
+        public required string Token { get; set; }
 
         [Required(ErrorMessage = "La nueva clave es obligatoria.")]
-        public string NuevaClave { get; set; }
+        public required string NuevaClave { get; set; }
     }
 }

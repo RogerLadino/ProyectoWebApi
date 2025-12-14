@@ -1,37 +1,41 @@
 ﻿using Domain.Exceptions;
+using Domain.Exceptions.Classroom;
 using LoggingService;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
-internal sealed class GlobalExceptionHandler(
-    IProblemDetailsService problemDetailsService,
-    ILoggerManager logger) : IExceptionHandler
+namespace Infrastructure.Exceptions
 {
-    public async ValueTask<bool> TryHandleAsync(
-        HttpContext httpContext,
-        Exception exception,
-        CancellationToken cancellationToken)
+    internal sealed class GlobalExceptionHandler(
+        IProblemDetailsService problemDetailsService,
+        ILoggerManager logger) : IExceptionHandler
     {
-        logger.LogError($"Unhandled exception occurred: {exception.Message}");
-
-        httpContext.Response.StatusCode = exception switch
+        public async ValueTask<bool> TryHandleAsync(
+            HttpContext httpContext,
+            Exception exception,
+            CancellationToken cancellationToken)
         {
-            ApplicationException => StatusCodes.Status400BadRequest,
-            ClassroomAlreadyExistsException => StatusCodes.Status400BadRequest,
-            ExerciseNotFoundException => StatusCodes.Status404NotFound,
-            _ => StatusCodes.Status500InternalServerError
-        };
+            logger.LogError($"Unhandled exception occurred: {exception.Message}");
 
-        return await problemDetailsService.TryWriteAsync(new ProblemDetailsContext
-        {
-            HttpContext = httpContext,
-            Exception = exception,
-            ProblemDetails = new ProblemDetails
+            httpContext.Response.StatusCode = exception switch
             {
-                Type = exception.GetType().Name,
-                Title = "An error occured",
-                Detail = exception.Message
-            }
-        });
+                ApplicationException => StatusCodes.Status400BadRequest,
+                ClassroomAlreadyExistsException => StatusCodes.Status400BadRequest,
+                ExerciseNotFoundException => StatusCodes.Status404NotFound,
+                _ => StatusCodes.Status500InternalServerError
+            };
+
+            return await problemDetailsService.TryWriteAsync(new ProblemDetailsContext
+            {
+                HttpContext = httpContext,
+                Exception = exception,
+                ProblemDetails = new ProblemDetails
+                {
+                    Type = exception.GetType().Name,
+                    Title = "An error occured",
+                    Detail = exception.Message
+                }
+            });
+        }
     }
 }

@@ -9,6 +9,7 @@ using Shared.DTOs.Submission;
 using Shared.DTOs.Users;
 
 namespace Services;
+
 public class SubmissionService : ISubmissionService
 {
     private readonly IRepositoryManager _repositoryManager;
@@ -20,13 +21,16 @@ public class SubmissionService : ISubmissionService
 
     public async Task<IEnumerable<SubmissionDto>> GetAllAsync(int exerciseId)
     {
-        var exercise = await _repositoryManager.ExerciseRepository.GetByIdAsync(exerciseId);
+        var exercise = await _repositoryManager.ExerciseRepository
+            .GetByIdAsync(exerciseId) 
+            ?? throw new KeyNotFoundException("No existe un ejercicio con este ID.");
 
         var submissions = await _repositoryManager.SubmissionRepository
             .FindByConditionAsync(s => s.ExerciseId == exerciseId);
 
         var classroom = await _repositoryManager.ClassroomRepository
-            .GetByIdWithUsersAsync(exercise.ClassroomId);
+            .GetByIdWithUsersAsync(exercise.ClassroomId) 
+            ?? throw new KeyNotFoundException("No existe una clase con este ID.");
 
         var submissionDict = submissions
             .ToDictionary(s => s.AppUserId, s => s.Adapt<SubmissionDto>());
@@ -57,7 +61,6 @@ public class SubmissionService : ISubmissionService
 
     public async Task<SubmissionDto> GetByIdAsync(int userId, int exerciseId)
     {
-
         var submission = (await _repositoryManager.SubmissionRepository
             .FindByConditionAsync(s => s.ExerciseId == exerciseId && s.AppUserId == userId))
             .FirstOrDefault();
@@ -74,7 +77,7 @@ public class SubmissionService : ISubmissionService
 
         var user = await _repositoryManager.UsuarioRepository.GetByIdAsync(submission.AppUserId);
 
-        if(user == null)
+        if (user == null)
         {
             throw new KeyNotFoundException("User not found");
         }
@@ -94,11 +97,10 @@ public class SubmissionService : ISubmissionService
         {
             submission.Grade = grade;
 
-           _repositoryManager.SubmissionRepository.Update(submission);
+            _repositoryManager.SubmissionRepository.Update(submission);
             await _repositoryManager.SaveChangesAsync();
             return;
         }
-
 
         var submissionDto = new SubmissionCreationDto
         {
@@ -112,9 +114,9 @@ public class SubmissionService : ISubmissionService
         await CreateAsync(submissionDto);
     }
 
-    public async Task<SubmissionDto> CreateAsync(SubmissionCreationDto submissionForCreationDto)
+    public async Task<SubmissionDto> CreateAsync(SubmissionCreationDto submissionCreationDto)
     {
-        var submission = submissionForCreationDto.Adapt<Submission>();
+        var submission = submissionCreationDto.Adapt<Submission>();
 
         var submissionExists = await _repositoryManager.SubmissionRepository
             .AnyAsync(s => s.ExerciseId == submission.ExerciseId
@@ -122,7 +124,6 @@ public class SubmissionService : ISubmissionService
 
         if (submissionExists)
             throw new SubmissionAlreadyExistsException("Submission already exists");
-
 
         _repositoryManager.SubmissionRepository.Add(submission);
         await _repositoryManager.SaveChangesAsync();

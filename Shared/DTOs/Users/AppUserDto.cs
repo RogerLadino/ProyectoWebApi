@@ -1,27 +1,34 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Shared.DTOs.Users;
-
-public partial class AppUserDto
+namespace Shared.DTOs.Users
 {
-    [Key]
-    public int Id { get; set; }
+    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false)]
+    public class NameLengthAttribute : StringLengthAttribute
+    {
+        public NameLengthAttribute() : base(45) { }
+    }
 
-    [EmailAddress]
-    [StringLength(45)]
-    public string Email { get; set; } = null!;
+    public partial class AppUserDto
+    {
+        [Key]
+        public int Id { get; set; }
 
-    [StringLength(45)]
-    public string FirstName { get; set; } = null!;
+        [EmailAddress]
+        [NameLength]
+        public string Email { get; set; } = null!;
 
-    [StringLength(45)]
-    public string? MiddleName { get; set; }
+        [NameLength]
+        public string FirstName { get; set; } = null!;
 
-    [StringLength(45)]
-    public string LastName { get; set; } = null!;
+        [NameLength]
+        public string? MiddleName { get; set; }
 
-    [StringLength(45)]
-    public string? SecondLastName { get; set; }
+        [NameLength]
+        public string LastName { get; set; } = null!;
 
-    public int AppRoleId { get; set; }
+        [NameLength]
+        public string? SecondLastName { get; set; }
+
+        public int AppRoleId { get; set; }
+    }
 }

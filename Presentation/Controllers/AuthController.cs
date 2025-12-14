@@ -35,7 +35,7 @@ namespace ClassroomApi.Infrastructure.Presentation.Controllers
 
         [HttpPost("registro")]
         [AllowAnonymous]
-        public async Task<IActionResult> Registro([FromBody] RegistroDTO registroDto)
+        public async Task<IActionResult> Registro([FromBody] RegistroDto registroDto)
         {
             if (!ModelState.IsValid)
             {
@@ -53,7 +53,7 @@ namespace ClassroomApi.Infrastructure.Presentation.Controllers
 
         [HttpPost("login")]
         [AllowAnonymous]
-        public async Task<IActionResult> Login([FromBody] LoginDTO loginDto)
+        public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
         {
             var token = await _serviceManager.AuthService.LoginAsync(loginDto);
             if (token == null)
@@ -61,12 +61,12 @@ namespace ClassroomApi.Infrastructure.Presentation.Controllers
                 return Unauthorized(new { message = "Credenciales incorrectas." });
             }
 
-            return Ok(new LoginResponseDTO { Token = token });
+            return Ok(new LoginResponseDto { Token = token });
         }
 
         [HttpPost("recuperar-clave")]
         [AllowAnonymous]
-        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDTO forgotPasswordDto)
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDto forgotPasswordDto)
         {
             await _serviceManager.AuthService.ForgotPasswordAsync(forgotPasswordDto);
             return Ok(new { message = "Si existe una cuenta con ese correo, un enlace de recuperación ha sido enviado." });
@@ -74,7 +74,7 @@ namespace ClassroomApi.Infrastructure.Presentation.Controllers
 
         [HttpPost("nueva-clave")]
         [AllowAnonymous]
-        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDTO resetPasswordDto)
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto resetPasswordDto)
         {
             if (!ModelState.IsValid)
             {

@@ -1,45 +1,54 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Domain.Entities;
-
-[Table("AppUser")]
-public partial class AppUser
+namespace Domain.Entities
 {
-    [Key]
-    public int Id { get; set; }
+    // Atributo personalizado para evitar repetir [StringLength(45)]
+    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false)]
+    public class NameLengthAttribute : StringLengthAttribute
+    {
+        public NameLengthAttribute() : base(45) { }
+    }
 
-    [EmailAddress]
-    [StringLength(45)]
-    public string Email { get; set; } = null!;
+    [Table("AppUser")]
+    public partial class AppUser
+    {
+        [Key]
+        public int Id { get; set; }
 
-    [StringLength(45)]
-    public string FirstName { get; set; } = null!;
+        [EmailAddress]
+        [NameLength]
+        public string Email { get; set; } = null!;
 
-    [StringLength(45)]
-    public string? MiddleName { get; set; }
+        [NameLength]
+        public string FirstName { get; set; } = null!;
 
-    [StringLength(45)]
-    public string LastName { get; set; } = null!;
+        [NameLength]
+        public string? MiddleName { get; set; }
 
-    [StringLength(45)]
-    public string? SecondLastName { get; set; }
+        [NameLength]
+        public string LastName { get; set; } = null!;
 
-    [StringLength(128)]
-    public string Password { get; set; } = null!;
+        [NameLength]
+        public string? SecondLastName { get; set; }
 
-    public int AppRoleId { get; set; }
+        [StringLength(128)]
+        public string Password { get; set; } = null!;
 
-    [ForeignKey("AppRoleId")]
-    [InverseProperty("AppUsers")]
-    public virtual AppRole AppRole { get; set; } = null!;
-    public string? TokenResetPassword { get; set; }
-    public DateTime? FechaExpiracionToken { get; set; }
+        public int AppRoleId { get; set; }
 
-    [InverseProperty("AppUser")]
-    public virtual ICollection<Submission> Submissions { get; set; } = new List<Submission>();
+        [ForeignKey("AppRoleId")]
+        [InverseProperty("AppUsers")]
+        public virtual AppRole AppRole { get; set; } = null!;
 
-    [ForeignKey("AppUserId")]
-    [InverseProperty("AppUsers")]
-    public virtual ICollection<Classroom> Classrooms { get; set; } = new List<Classroom>();
+        public string? TokenResetPassword { get; set; }
+        public DateTime? FechaExpiracionToken { get; set; }
+
+        [InverseProperty("AppUser")]
+        public virtual ICollection<Submission> Submissions { get; set; } = new List<Submission>();
+
+        [ForeignKey("AppUserId")]
+        [InverseProperty("AppUsers")]
+        public virtual ICollection<Classroom> Classrooms { get; set; } = new List<Classroom>();
+    }
 }
