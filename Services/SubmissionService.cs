@@ -66,14 +66,18 @@ public class SubmissionService : ISubmissionService
             .FirstOrDefault();
 
         if (submission == null)
-            return new SubmissionDto
+        {
+            SubmissionCreationDto newSubmission = new SubmissionCreationDto
             {
                 AppUserId = userId,
                 ExerciseId = exerciseId,
                 Grade = 0,
                 Status = 0,
-                SubmittedAt = null
+                SubmittedAt = DateTime.MaxValue
             };
+
+            return await CreateAsync(newSubmission);
+        }
 
         var user = await _repositoryManager.UsuarioRepository.GetByIdAsync(submission.AppUserId);
 
