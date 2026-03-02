@@ -8,7 +8,8 @@ namespace OrdenesCompra.Extensions
         services.AddCors(options =>
         {
             options.AddPolicy("CorsPolicy", builder =>
-                builder.WithOrigins("http://localhost:8081", "http://localhost:5173")
+                builder
+                .SetIsOriginAllowed(_ => true)
                 .AllowAnyMethod()
                 .AllowAnyHeader()
                 .AllowCredentials());
