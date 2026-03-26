@@ -41,12 +41,12 @@ namespace Persistence.Migrations
                         new
                         {
                             Id = 1,
-                            Description = "profesor"
+                            Description = "Profesor"
                         },
                         new
                         {
                             Id = 2,
-                            Description = "alumno"
+                            Description = "Alumno"
                         });
                 });
 
